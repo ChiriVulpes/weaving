@@ -1,0 +1,60 @@
+import StringWalker from "./StringWalker";
+import { IToken } from "./Token";
+
+export interface IWarpAPI {
+	tokenise (walker: StringWalker, until?: string[]): IToken[];
+}
+
+export default class Warp {
+
+	private readonly _matches: Match[] = [];
+	public get matches () {
+		return this._matches.length === 0 ? Match.BASIC : this._matches;
+	}
+
+	public match (...matches: Match[]) {
+		this._matches.push(...matches);
+		return this;
+	}
+
+	public tokenise?: (walker: StringWalker, match: Match, api: IWarpAPI) => IToken | IToken[] | undefined;
+	public setTokeniser (tokeniser: (walker: StringWalker, match: Match, api: IWarpAPI) => IToken | IToken[] | undefined) {
+		this.tokenise = tokeniser;
+		return this;
+	}
+}
+
+export class Match {
+
+	public static readonly BASIC = new Match();
+
+	public start: string[] = ["{"];
+
+	public setStart (...starts: string[]) {
+		this.start = starts;
+		return this;
+	}
+
+	public addStarts (...starts: string[]) {
+		this.start.push(...starts);
+		return this;
+	}
+
+	public end: string[] = ["}"];
+
+	public setEnd (...ends: string[]) {
+		this.end = ends;
+		return this;
+	}
+
+	public addEnds (...ends: string[]) {
+		this.end.push(...ends);
+		return this;
+	}
+
+	public clone () {
+		return new Match(/* this.match */)
+			.setStart(...this.start)
+			.setEnd(...this.end);
+	}
+}
