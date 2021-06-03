@@ -75,7 +75,7 @@ export default class Weave implements IWarpAPI {
 					if (!warpTokens)
 						continue;
 
-					walker = warpWalker;
+					walker.walkTo(warpWalker.cursor);
 					tokens.push(...arrayOr(warpTokens));
 					token = tokens[tokens.length - 1];
 					walker.prev();

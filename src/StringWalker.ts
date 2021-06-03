@@ -20,6 +20,11 @@ export default class StringWalker {
 		return this;
 	}
 
+	public walkTo (index: number) {
+		this.cursor = index;
+		return this;
+	}
+
 	public walkWhitespace () {
 		let char = this.char;
 		do {
@@ -76,6 +81,6 @@ export default class StringWalker {
 
 	public clone () {
 		return new StringWalker(this.str)
-			.walk(this.cursor);
+			.walkTo(this.cursor);
 	}
 }
