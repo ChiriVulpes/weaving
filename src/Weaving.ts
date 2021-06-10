@@ -6,39 +6,49 @@ import WarpConditional from "./warps/WarpConditional";
 
 export default class Weave implements IWarpAPI {
 
-	public static compile (...tokens: IToken[]) {
-		let compiled = "(...arguments) => [";
+	public static compile (source: string, warps?: Warp[]) {
+		return this.compileTokens(...new Weave(source, warps).tokenise());
+	}
+
+	private static compileTokens (...tokens: IToken[]) {
+		let args = false;
+		let compiled = "";
 		// const args: any[] = [];
 		for (const token of tokens) {
 			if (!token.compiled)
 				continue;
 
 			compiled += `${token.compiled},`;
-			// for (const { path, type } of token.args ?? []) {
-			// 	const keys = path.split(".");
-			// 	if (keys.length === 0)
-			// 		continue;
 
-			// 	if (isNaN(+keys[0]))
-			// 		keys.unshift("0");
+			for (const { path /* , type */ } of token.args ?? []) {
+				const keys = path.split(".");
+				if (keys.length === 0)
+					continue;
 
-			// 	// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-			// 	let cursorObject: any = args;
-			// 	for (let i = 0; i < keys.length; i++) {
-			// 		const key = keys[i];
-			// 		if (key in cursorObject) {
-			// 			// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-			// 			const incompatible = (i < keys.length - 1 && typeof cursorObject[key] !== "object")
-			// 				|| (i === keys.length - 1 && cursorObject[key] === );
-			// 			if () {
-			// 				// there's more keys, these arguments aren't compatible
-			// 				console.warn(`Incompatible arguments: ${keys.slice(0, i + 1).join(".")}`);
-			// 			}
-			// 		}
-			// 	}
-			// }
+				args = true;
+				// 	if (isNaN(+keys[0]))
+				// 		keys.unshift("0");
+
+				// 	// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+				// 	let cursorObject: any = args;
+				// 	for (let i = 0; i < keys.length; i++) {
+				// 		const key = keys[i];
+				// 		if (key in cursorObject) {
+				// 			// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+				// 			const incompatible = (i < keys.length - 1 && typeof cursorObject[key] !== "object")
+				// 				|| (i === keys.length - 1 && typeof cursorObject[key] === "object");
+				// 			if () {
+				// 				// there's more keys, these arguments aren't compatible
+				// 				console.warn(`Incompatible arguments: ${keys.slice(0, i + 1).join(".")}`);
+				// 			}
+				// 		}
+				// 	}
+			}
 		}
-		return `${compiled}]`;
+		return {
+			script: `${args ? "(...a)" : "_"}=>[${compiled}]`,
+			definitions: `(${args ? "...arguments: any[]" : ""}): Weft[]`,
+		};
 	}
 
 	public static defaultWarps: Warp[] = [

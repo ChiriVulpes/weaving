@@ -17,7 +17,7 @@ const initBuildFolder = new Series(remove("build"))
 		.pipe(() => replace(/("version": "\d+\.\d+\.\d+)(",)/, "$1-amd$2"))
 		.pipe("build/amd"));
 
-Task.create("mocha", Pipe.create("tests/**/*.ts", { read: false })
+Task.create("mocha", Pipe.create(["tests/**/*.ts", "!tests/temp/**/*"], { read: false })
 	.pipe(() => mocha({ reporter: "even-more-min", require: ["ts-node/register"] } as any))
 	.on("error", () => process.exitCode = 1));
 
@@ -46,7 +46,7 @@ const watchCommonJS = async () => new TypescriptWatch("src", "build")
 
 new Task("watch", initBuildFolder)
 	.then("compile-test", watchCommonJS)
-	.then("watch-tests", watch("tests/**/*.ts", "mocha"))
+	.then("watch-tests", watch(["tests/**/*.ts", "!tests/temp/**/*", "tests/**/*.quilt"], "mocha"))
 	.then("mocha")
 	.create();
 

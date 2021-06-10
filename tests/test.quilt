@@ -1,0 +1,21 @@
+# ui
+## menu-screen
+### main
+button-play: Enter
+button-options: Options
+button-exit: Leave
+
+## battle-screen
+### static
+label-cards-remaining: {REMAINING} Remaining
+
+# game
+
+## objects
+### spell
+
+### summon
+douse-o-matic: Douse-o-Matic
+
+### special
+

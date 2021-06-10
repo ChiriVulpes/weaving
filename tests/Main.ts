@@ -1,6 +1,7 @@
 import chai from "chai";
 import chaiAsPromised from "chai-as-promised";
-import Weave from "../build/Weaving";
+import * as fs from "fs";
+import QuiltBuilderNode from "../build/QuiltBuilderNode";
 
 chai.use(chaiAsPromised);
 // @ts-ignore
@@ -10,10 +11,23 @@ const expect = chai.expect;
 // 	return new Promise<T>(resolve => setTimeout(() => resolve(returnValue), ms));
 // }
 
-const tokens = new Weave("{GREET?Hello{GREET? there}:Goodbye} {NAME}").tokenise();
-console.log("\n");
-console.log("tokens:")
-tokens.forEach(token => console.log(token));
-const fn = Weave.compile(...tokens);
-console.log("function", fn);
-console.log("result", globalThis.eval(fn)({ GREET: true, NAME: "Joe" }));
+const quilt = new QuiltBuilderNode();
+quilt.definitions.pipe(fs.createWriteStream("tests/temp/test.d.ts"));
+fs.createReadStream("tests/test.quilt")
+	.pipe(quilt)
+	.pipe(fs.createWriteStream("tests/temp/test.js"))
+	.on("error", (err) => {
+		err.message = `Failed to compile quilt: ${err.message}`;
+		throw err;
+	})
+	.on("finish", () => {
+		try {
+			const quilt = require("./temp/test.js").default;
+			for (const key in quilt) {
+				console.log(key, quilt[key]({ NAME: "joe", REMAINING: 5 }, 2, 3));
+			}
+		} catch (err) {
+			err.message = `Failed to execute quilt: ${err.message}`;
+			throw err;
+		}
+	});

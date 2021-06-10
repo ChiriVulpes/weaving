@@ -4,18 +4,13 @@
         "module": "commonjs",
         "esModuleInterop": true,
         "experimentalDecorators": true,
-        "plugins": [
-            {
-                "name": "typescript-tslint-plugin"
-            }
-        ],
         "strict": true,
         "forceConsistentCasingInFileNames": true,
         "noImplicitReturns": true,
         "noUnusedLocals": true,
         "noUnusedParameters": false,
         "strictPropertyInitialization": false,
-        "types": ["mocha"]
+        "types": ["mocha", "node"]
     },
     "include": [
         "**/*.ts"

@@ -6,19 +6,21 @@ export interface IArgument {
 export namespace IArgument {
 	const REGEX_WORD = /^\w+$/;
 	export function accessor (path: string) {
-		const argumentPath = path.split(".")
+		let argumentPath = path.split(".")
 			.map(argument =>
 				// numeric key
 				!isNaN(parseInt(argument)) ? `[${argument}]`
 					// string key
-					: REGEX_WORD.test(argument) ? `.${argument}`
+					: REGEX_WORD.test(argument) ? `${argument}`
 						// string key (invalid characters)
 						: `["${argument}"]`);
 
-		if (!argumentPath[0].startsWith("["))
+		if (argumentPath[0][0] !== "[" || argumentPath[0][1] === "\"")
 			argumentPath.unshift("[0]");
 
-		argumentPath.unshift("arguments")
+		argumentPath = argumentPath.map((argument, i) => i ? `?.${argument}` : argument)
+
+		argumentPath.unshift("a")
 		return argumentPath.join("");
 	}
 }
@@ -30,12 +32,12 @@ export interface IToken {
 
 export interface IWeft {
 	content: string;
-	style?: Record<string, string>;
+	details?: Record<string, string>;
 }
 
 export namespace IWeft {
 	export function compile (weft: IWeft) {
-		return `{content:${weft.content}${weft.style ? JSON.stringify(weft.style) : ""}}`;
+		return `{content:${weft.content}${weft.details ? JSON.stringify(weft.details) : ""}}`;
 	}
 }
 

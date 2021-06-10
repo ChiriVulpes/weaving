@@ -5,23 +5,13 @@
         "module": "commonjs",
         "esModuleInterop": true,
         "experimentalDecorators": true,
-        "plugins": [
-            {
-                "name": "typescript-tslint-plugin"
-            }
-        ],
         "strict": true,
         "forceConsistentCasingInFileNames": true,
         "noImplicitReturns": true,
         "noUnusedLocals": true,
         "noUnusedParameters": false,
         "strictPropertyInitialization": false,
-        "noImplicitOverride": true,
-        "lib": [
-            "esnext",
-            "dom"
-        ],
-        "types": []
+        "noImplicitOverride": true
     },
     "include": [
         "**/*.ts"
