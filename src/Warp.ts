@@ -26,9 +26,20 @@ export default class Warp {
 
 export class Match {
 
+	public static BASIC_START = "{";
+	public static BASIC_END = "}";
 	public static readonly BASIC = new Match();
 
-	public start: string[] = ["{"];
+	public constructor ();
+	public constructor (start: string, end?: string);
+	public constructor (start?: string, end?: string) {
+		if (start !== undefined)
+			this.start[0] = start;
+		if (end !== undefined)
+			this.end[0] = end;
+	}
+
+	public start: string[] = [Match.BASIC_START];
 
 	public setStart (...starts: string[]) {
 		this.start = starts;
@@ -40,7 +51,7 @@ export class Match {
 		return this;
 	}
 
-	public end: string[] = ["}"];
+	public end: string[] = [Match.BASIC_END];
 
 	public setEnd (...ends: string[]) {
 		this.end = ends;

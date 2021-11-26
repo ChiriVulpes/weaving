@@ -27,35 +27,60 @@ export namespace IArgument {
 
 export interface IToken {
 	compiled?: string;
+	string?: string;
 	args?: IArgument[];
 }
 
 export interface IWeft {
-	content: string;
+	content: string | IToken[];
 	details?: Record<string, string>;
 }
 
 export namespace IWeft {
-	export function compile (weft: IWeft) {
-		return `{content:${weft.content}${weft.details ? JSON.stringify(weft.details) : ""}}`;
+	export function compile (weft: IWeft): string {
+		const content = typeof weft.content === "string" ? weft.content : `[${weft.content.map(token => token.compiled).join(",")}]`;
+		return `{content:${content}${weft.details ? `,${JSON.stringify(weft.details)}` : ""}}`;
 	}
 }
 
 class Token implements IToken {
 
 	public static compile (...tokens: IToken[]) {
-		return tokens.map(token => token.compiled).join(",");
+		return tokens.map(token => token.compiled ?? "\"\"").join(",");
+	}
+
+	public static stringify (inner: true, ...tokens: IToken[]): string;
+	public static stringify (...tokens: IToken[]): string;
+	public static stringify (inner: boolean | IToken, ...tokens: IToken[]) {
+		if (inner !== true)
+			tokens.unshift(inner as IToken), inner = false;
+		return `${inner ? "" : "`"}${tokens.map(token => token.string ?? "").join("")}${inner ? "" : "`"}`;
+	}
+
+	public static rawGenerator (generator: string) {
+		return `\${${generator}}`;
 	}
 
 	public compiled?: string;
-	public setCompiled (compiled: IWeft | string) {
+	public string?: string;
+	public setCompiled (compiled: IWeft | string, string: string) {
 		this.compiled = typeof compiled === "string" ? compiled : IWeft.compile(compiled);
+		this.string = string;
 		return this;
 	}
 
 	public args: IArgument[] = [];
 	public addArgument (path: string, type: string) {
 		this.args.push({ path, type });
+		return this;
+	}
+
+	public inheritArguments (...tokens: IToken[]) {
+		for (const token of tokens)
+			if (token instanceof Token)
+				for (let i = this.args.length; i < token.args.length; i++)
+					this.args.push(token.args[i]);
+
 		return this;
 	}
 }
@@ -66,6 +91,10 @@ namespace Token {
 		public text = "";
 		public get compiled () {
 			return `{content:${JSON.stringify(this.text)}}`;
+		}
+
+		public get string () {
+			return this.text;
 		}
 	}
 }

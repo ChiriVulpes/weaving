@@ -25,6 +25,16 @@ export default class StringWalker {
 		return this;
 	}
 
+	public walkUntil (substr: string) {
+		let char = this.char;
+		do {
+			if (char === substr[0] && this.isAtSubstr(substr))
+				break;
+		} while (char = this.next());
+
+		return this;
+	}
+
 	public walkWhitespace () {
 		let char = this.char;
 		do {
@@ -82,5 +92,16 @@ export default class StringWalker {
 	public clone () {
 		return new StringWalker(this.str)
 			.walkTo(this.cursor);
+	}
+
+	public isAtSubstr (substr: string) {
+		if (this.cursor + substr.length > this.str.length)
+			return false;
+
+		for (let i = 0; i < substr.length; i++)
+			if (this.str[this.cursor + i] !== substr[i])
+				return false;
+
+		return true;
 	}
 }

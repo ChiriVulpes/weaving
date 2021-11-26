@@ -37,7 +37,7 @@ export default class Quilt {
 	}
 
 	public start () {
-		this.scriptConsumer?.("(typeof define===\"function\"?define:F=>F(require,exports,module))((require,exports,module)=>{Object.defineProperty(exports,'__esModule',{value:true});exports.default={");
+		this.scriptConsumer?.("(typeof define===\"function\"?define:F=>F(require,exports,module))((require,exports,module)=>{Object.defineProperty(exports,'__esModule',{value:true});let r=t=>Array.isArray(t)?t.map(r).join(\"\"):typeof t.content==\"object\"?r(t.content):t.content;let c=c=>({content:c,toString(){return r(this.content)}});exports.default={");
 		this.definitionsConsumer?.(`
 declare type StringResolvable = string | { toString (): string };
 
@@ -221,6 +221,7 @@ declare const quilt: {
 		switch (this.mode) {
 			case Mode.Translation:
 			case Mode.TranslationOrEntry:
+			case Mode.TranslationOrDictionaryOrEntry:
 				this.pushEntry();
 				break;
 		}

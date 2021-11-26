@@ -16,10 +16,12 @@ export default new Warp()
 		walker.walkSubstr(":");
 		const ifFalse = api.tokenise(walker, match.end);
 
-		if (!walker.walkSubstr(...match.end))
-			return undefined;
+		walker.walkSubstr(...match.end);
 
+		const accessor = IArgument.accessor(argument);
 		return new Token()
 			.addArgument(argument, "any")
-			.setCompiled(`...${IArgument.accessor(argument)}?[${Token.compile(...ifTrue)}]:[${Token.compile(...ifFalse)}]`);
+			.inheritArguments(...ifTrue, ...ifFalse)
+			.setCompiled(`...${accessor}?[${Token.compile(...ifTrue)}]:[${Token.compile(...ifFalse)}]`,
+				Token.rawGenerator(`${accessor}?\`${Token.stringify(true, ...ifTrue)}\`:\`${Token.stringify(true, ...ifFalse)}\``));
 	});

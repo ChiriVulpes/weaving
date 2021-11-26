@@ -9,10 +9,10 @@ export default new Warp()
 			return undefined;
 
 		walker.walkWhitespace();
-		if (!walker.walkSubstr(...match.end))
-			return undefined;
+		walker.walkSubstr(...match.end);
 
+		const accessor = IArgument.accessor(argument);
 		return new Token()
 			.addArgument(argument, "any")
-			.setCompiled({ content: IArgument.accessor(argument) });
+			.setCompiled({ content: accessor }, Token.rawGenerator(accessor));
 	});

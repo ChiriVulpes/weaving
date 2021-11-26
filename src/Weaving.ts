@@ -3,6 +3,7 @@ import Token, { IToken } from "./Token";
 import Warp, { IWarpAPI, Match } from "./Warp";
 import WarpArgument from "./warps/WarpArgument";
 import WarpConditional from "./warps/WarpConditional";
+import WarpTag from "./warps/WarpTag";
 
 export default class Weave implements IWarpAPI {
 
@@ -46,12 +47,13 @@ export default class Weave implements IWarpAPI {
 			}
 		}
 		return {
-			script: `${args ? "(...a)" : "_"}=>[${compiled}]`,
+			script: `${args ? "(...a)" : "_"}=>c([${compiled}])`,
 			definitions: `(${args ? "...arguments: any[]" : ""}): Weft[]`,
 		};
 	}
 
 	public static defaultWarps: Warp[] = [
+		WarpTag,
 		WarpConditional,
 		WarpArgument,
 	];

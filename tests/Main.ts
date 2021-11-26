@@ -24,9 +24,10 @@ fs.createReadStream("tests/test.quilt")
 		try {
 			const quilt = require("./temp/test.js").default;
 			for (const key in quilt) {
-				console.log(key, quilt[key]({ NAME: "joe", REMAINING: 5 }, 2, 3));
+				const result = quilt[key]({ NAME: "joe", REMAINING: 5 }, 2, 3);
+				console.log(key, result.content, result.toString());
 			}
-		} catch (err) {
+		} catch (err: any) {
 			err.message = `Failed to execute quilt: ${err.message}`;
 			throw err;
 		}

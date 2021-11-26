@@ -18,4 +18,7 @@ label-cards-remaining: {REMAINING} Remaining
 douse-o-matic: Douse-o-Matic
 
 ### special
-
+thing: {COOL?wow!:oh :(}
+thing1: {#GOOD:amaaaazing!}
+thing2: {#{GOOD?GOOD:TERRIBLE}:amaaaazing!
+thing3: {#{GOOD?GOOD:TERRIBLE}:amaaaazing!
