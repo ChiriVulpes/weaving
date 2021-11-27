@@ -5,7 +5,7 @@ import Task, { Pipe, remove, Series, watch } from "./gulp/Task";
 import TypescriptWatch from "./gulp/TypescriptWatch";
 
 const initBuildFolder = new Series(remove("build"))
-	.then("init-build-folder", Pipe.create(["package-lock.json", "LICENSE", "README.md", ".npmignore"])
+	.then("init-build-folder", Pipe.create(["package-lock.json", "LICENSE", "README.md"])
 		.pipe("build"))
 	.then("init-package-json", Pipe.create("package.json")
 		.pipe(() => replace(/"private": true,\s*\r?\n\s*/, ""))
