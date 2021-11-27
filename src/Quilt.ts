@@ -1,5 +1,8 @@
 import Warp from "./Warp";
-import Weave from "./Weaving";
+import Weave from "./Weave";
+
+const UMD_HEADER = "(function(factory){if(typeof module===\"object\"&&typeof module.exports===\"object\"){var v=factory(require, exports);if(v!==undefined)module.exports=v}else if(typeof define===\"function\"&&define.amd){define([\"require\",\"exports\"],factory);}})(function(require,exports){\"use strict\";Object.defineProperty(exports,\"__esModule\",{value:true});";
+const UMD_FOOTER = "})";
 
 const enum Mode {
 	CommentOrDictionaryOrEntry,
@@ -37,7 +40,7 @@ export default class Quilt {
 	}
 
 	public start () {
-		this.scriptConsumer?.("(typeof define===\"function\"?define:F=>F(require,exports,module))((require,exports,module)=>{Object.defineProperty(exports,'__esModule',{value:true});let r=t=>Array.isArray(t)?t.map(r).join(\"\"):typeof t.content==\"object\"?r(t.content):t.content;let c=c=>({content:c,toString(){return r(this.content)}});exports.default={");
+		this.scriptConsumer?.(`${UMD_HEADER}let r=t=>Array.isArray(t)?t.map(r).join(""):typeof t.content=="object"?r(t.content):t.content;let c=c=>({content:c,toString(){return r(this.content)}});exports.default={`);
 		this.definitionsConsumer?.(`
 declare type StringResolvable = string | { toString (): string };
 
@@ -226,7 +229,7 @@ declare const quilt: {
 				break;
 		}
 
-		this.scriptConsumer?.("}})");
+		this.scriptConsumer?.(`}${UMD_FOOTER}`);
 		this.definitionsConsumer?.(`
 };
 
