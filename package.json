@@ -1,14 +1,14 @@
 {
 	"private": true,
 	"name": "@wayward/weaving",
-	"version": "0.1.0",
-	"description": "A ridiculously powerful and easy-to-use string interpolation system. 🚀",
+	"version": "2.0.0",
+	"description": "A ridiculously powerful and easy-to-use language system. 🚀",
 	"license": "MIT",
 	"main": "Weaving.js",
 	"types": "./Weaving.d.ts",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/WaywardGame/weaving"
+		"url": "https://github.com/ChiriVulpes/weaving"
 	},
 	"devDependencies": {
 		"@types/chai": "4.2.16",
