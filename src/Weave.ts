@@ -12,44 +12,46 @@ export default class Weave implements IWarpAPI {
 	}
 
 	private static compileTokens (...tokens: IToken[]) {
-		let args = false;
 		let compiled = "";
-		// const args: any[] = [];
+		const argTypes: Set<string>[] = [];
+
 		for (const token of tokens) {
 			if (!token.compiled)
 				continue;
 
 			compiled += `${token.compiled},`;
 
-			for (const { path /* , type */ } of token.args ?? []) {
+			for (const { path, type } of token.args ?? []) {
 				const keys = path.split(".");
 				if (keys.length === 0)
 					continue;
 
-				args = true;
-				// 	if (isNaN(+keys[0]))
-				// 		keys.unshift("0");
+				if (isNaN(+keys[0]))
+					keys.unshift("0");
 
-				// 	// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-				// 	let cursorObject: any = args;
-				// 	for (let i = 0; i < keys.length; i++) {
-				// 		const key = keys[i];
-				// 		if (key in cursorObject) {
-				// 			// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-				// 			const incompatible = (i < keys.length - 1 && typeof cursorObject[key] !== "object")
-				// 				|| (i === keys.length - 1 && typeof cursorObject[key] === "object");
-				// 			if () {
-				// 				// there's more keys, these arguments aren't compatible
-				// 				console.warn(`Incompatible arguments: ${keys.slice(0, i + 1).join(".")}`);
-				// 			}
-				// 		}
-				// 	}
+				const generatedType = this.compileType(keys.slice(1), type);
+
+				(argTypes[+keys[0]] ??= new Set()).add(generatedType);
 			}
 		}
+
+		let args = "";
+		if (argTypes.length)
+			args = argTypes
+				.map((typeSet, i) => `arg_${i}: ${[...typeSet].join(" & ")}`)
+				.join(",");
+
 		return {
 			script: `${args ? "(...a)" : "_"}=>c([${compiled}])`,
-			definitions: `(${args ? "...arguments: any[]" : ""}): Weft[]`,
+			definitions: `(${args}): Weave`,
 		};
+	}
+
+	private static compileType (keys: string[], type: string) {
+		let result = type;
+		for (let i = keys.length - 1; i >= 0; i--)
+			result = `{ "${keys[i]}": ${result} }`;
+		return result;
 	}
 
 	public static defaultWarps: Warp[] = [

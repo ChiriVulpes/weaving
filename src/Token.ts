@@ -78,8 +78,8 @@ class Token implements IToken {
 	public inheritArguments (...tokens: IToken[]) {
 		for (const token of tokens)
 			if (token instanceof Token)
-				for (let i = this.args.length; i < token.args.length; i++)
-					this.args.push(token.args[i]);
+				for (const arg of token.args)
+					this.args.push(arg);
 
 		return this;
 	}

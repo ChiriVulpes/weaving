@@ -5,7 +5,6 @@ import Warp from "./Warp";
 const nodeMode = typeof TransformStream === "undefined";
 // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-var-requires,  @typescript-eslint/no-unsafe-assignment
 const ExtensionClass = (nodeMode ? require("stream").Transform : TransformStream) as new (transformer?: Transformer) => Transform & TransformStream;
-console.log(ExtensionClass);
 
 export default class QuiltTransformer extends ExtensionClass {
 

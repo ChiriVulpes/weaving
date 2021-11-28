@@ -42,13 +42,15 @@ export default class Quilt {
 	public start () {
 		this.scriptConsumer?.(`${UMD_HEADER}let r=t=>Array.isArray(t)?t.map(r).join(""):typeof t.content=="object"?r(t.content):t.content;let c=c=>({content:c,toString(){return r(this.content)}});exports.default={`);
 		this.definitionsConsumer?.(`
-declare type StringResolvable = string | { toString (): string };
+export type StringResolvable = string | Weave;
 
-interface Weft {
-	content: StringResolvable
+export interface Weft {
+	content: StringResolvable;
 }
 
-declare const quilt: {
+export type Weave = Weft[];
+
+export interface Quilt {
 		`.trim() + "\n");
 		return this;
 	}
@@ -231,7 +233,9 @@ declare const quilt: {
 
 		this.scriptConsumer?.(`}${UMD_FOOTER}`);
 		this.definitionsConsumer?.(`
-};
+}
+
+declare const quilt: Quilt;
 
 export default quilt;
 		`.trim());
