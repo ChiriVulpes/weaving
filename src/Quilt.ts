@@ -4,6 +4,29 @@ import Weave from "./Weave";
 const UMD_HEADER = "(function(factory){if(typeof module===\"object\"&&typeof module.exports===\"object\"){var v=factory(require, exports);if(v!==undefined)module.exports=v}else if(typeof define===\"function\"&&define.amd){define([\"require\",\"exports\"],factory);}})(function(require,exports){\"use strict\";Object.defineProperty(exports,\"__esModule\",{value:true});";
 const UMD_FOOTER = "})";
 
+const FUNCTION_STRINGIFY = "let s=t=>Array.isArray(t)?t.map(s).join(\"\"):typeof t.content==\"object\"?s(t.content):t.content;";
+const FUNCTION_CONTENT = "let c=c=>({content:c,toString(){return s(this.content)}});";
+const FUNCTION_LENGTH = "let l=v=>!v?0:typeof v.length==\"number\"?v.length:typeof v.size==\"number\"?v.size:(typeof v==\"object\"||typeof v==\"function\")&&Symbol.iterator in v?[...v].length:typeof v==\"object\"?Object.keys(v).length:0;";
+
+const QUILT_HEADER = `
+export type StringResolvable = string | Weave;
+
+export interface Weft {
+	content: StringResolvable;
+}
+
+export type Weave = Weft[];
+
+export interface Quilt {
+`;
+
+const QUILT_FOOTER = `}
+
+declare const quilt: Quilt;
+
+export default quilt;
+`;
+
 const enum Mode {
 	CommentOrDictionaryOrEntry,
 	CommentOrEntry,
@@ -40,18 +63,8 @@ export default class Quilt {
 	}
 
 	public start () {
-		this.scriptConsumer?.(`${UMD_HEADER}let r=t=>Array.isArray(t)?t.map(r).join(""):typeof t.content=="object"?r(t.content):t.content;let c=c=>({content:c,toString(){return r(this.content)}});exports.default={`);
-		this.definitionsConsumer?.(`
-export type StringResolvable = string | Weave;
-
-export interface Weft {
-	content: StringResolvable;
-}
-
-export type Weave = Weft[];
-
-export interface Quilt {
-		`.trim() + "\n");
+		this.scriptConsumer?.(`${UMD_HEADER}${FUNCTION_STRINGIFY}${FUNCTION_CONTENT}${FUNCTION_LENGTH}exports.default={`);
+		this.definitionsConsumer?.(QUILT_HEADER);
 		return this;
 	}
 
@@ -232,13 +245,7 @@ export interface Quilt {
 		}
 
 		this.scriptConsumer?.(`}${UMD_FOOTER}`);
-		this.definitionsConsumer?.(`
-}
-
-declare const quilt: Quilt;
-
-export default quilt;
-		`.trim());
+		this.definitionsConsumer?.(QUILT_FOOTER);
 		return this;
 	}
 

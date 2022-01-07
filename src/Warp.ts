@@ -3,6 +3,7 @@ import { IToken } from "./Token";
 
 export interface IWarpAPI {
 	tokenise (walker: StringWalker, until?: string[]): IToken[];
+	tokeniseWarp (walker: StringWalker, warps: Iterable<Warp>): IToken[] | undefined;
 }
 
 export default class Warp {

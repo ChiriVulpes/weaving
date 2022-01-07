@@ -24,7 +24,7 @@ fs.createReadStream("tests/test.quilt")
 		try {
 			const quilt = require("./temp/test.js").default;
 			for (const key in quilt) {
-				const result = quilt[key]({ NAME: "joe", REMAINING: 5 }, 2, 3);
+				const result = quilt[key]({ NAME: "joe", REMAINING: { hi: true, wow: false } }, 2, 3);
 				console.log(key, result.content, result.toString());
 			}
 		} catch (err: any) {

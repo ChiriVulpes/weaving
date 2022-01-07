@@ -6,6 +6,10 @@ export interface IArgument {
 export namespace IArgument {
 	const REGEX_WORD = /^\w+$/;
 	export function accessor (path: string) {
+		const length = path.endsWith("..");
+		if (length)
+			path = path.slice(0, -2);
+
 		let argumentPath = path.split(".")
 			.map(argument =>
 				// numeric key
@@ -21,7 +25,8 @@ export namespace IArgument {
 		argumentPath = argumentPath.map((argument, i) => i ? `?.${argument}` : argument)
 
 		argumentPath.unshift("a")
-		return argumentPath.join("");
+		const accessor = argumentPath.join("");
+		return length ? `l(${accessor})` : accessor;
 	}
 }
 

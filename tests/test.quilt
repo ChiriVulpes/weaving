@@ -7,7 +7,7 @@ button-exit: Leave
 
 ## battle-screen
 ### static
-label-cards-remaining: {REMAINING} Remaining
+label-cards-remaining: {REMAINING..} Remaining
 
 # game
 

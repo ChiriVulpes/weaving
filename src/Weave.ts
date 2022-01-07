@@ -75,22 +75,11 @@ export default class Weave implements IWarpAPI {
 			if (until.some(substr => walker.hasNext(substr)))
 				break;
 
-			const matchingFirstChar = warps[char];
+			const matchingFirstChar = warps[char!];
 			if (matchingFirstChar !== undefined && matchingFirstChar.size > 0) {
-				const matching: [Warp, Match, StringWalker][] = [];
-				for (const warp of matchingFirstChar)
-					for (const match of arrayOr(warp.matches))
-						for (const start of match.start)
-							if (walker.hasNext(start))
-								matching.push([warp, match, walker.clone().walk(start.length)]);
-
-				for (const [warp, match, warpWalker] of matching) {
-					const warpTokens = warp.tokenise?.(warpWalker, match, this);
-					if (!warpTokens)
-						continue;
-
-					walker.walkTo(warpWalker.cursor);
-					tokens.push(...arrayOr(warpTokens));
+				const result = this.tokeniseWarp(walker, matchingFirstChar);
+				if (result) {
+					tokens.push(...result);
 					token = tokens[tokens.length - 1];
 					walker.prev();
 					continue NextChar;
@@ -105,11 +94,35 @@ export default class Weave implements IWarpAPI {
 		return tokens;
 	}
 
+	public tokeniseWarp (walker: StringWalker, warps: Set<Warp>): IToken[] | undefined {
+		const matching: [Warp, Match, StringWalker][] = [];
+		for (const warp of warps)
+			for (const match of arrayOr(warp.matches))
+				for (const start of match.start)
+					if (walker.hasNext(start))
+						matching.push([warp, match, walker.clone().walk(start.length)]);
+
+		for (const [warp, match, warpWalker] of matching) {
+			const warpTokens = warp.tokenise?.(warpWalker, match, this);
+			if (!warpTokens)
+				continue;
+
+			walker.walkTo(warpWalker.cursor);
+			return arrayOr(warpTokens);
+		}
+
+		return undefined;
+	}
+
+	private warpCache?: Record<string, Set<Warp> | undefined>;
 	/**
 	 * @returns A Record mapping all warps to the first character of each of their starts
 	 */
 	private buildWarpCache () {
-		const cache: Partial<Record<string, Set<Warp>>> = {};
+		if (this.warpCache)
+			return this.warpCache;
+
+		const cache: Record<string, Set<Warp> | undefined> = {};
 		for (const warp of this.warps) {
 			for (const match of arrayOr(warp.matches)) {
 				for (const start of match.start) {
@@ -119,7 +132,7 @@ export default class Weave implements IWarpAPI {
 			}
 		}
 
-		return cache;
+		return this.warpCache = cache;
 	}
 }
 
