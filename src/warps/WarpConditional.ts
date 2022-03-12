@@ -46,12 +46,15 @@ export default new Warp()
 		walker.walkSubstr(...match.end);
 
 		const token = new Token()
-			.inheritArguments(...ifTrue, ...ifFalse)
+			.inheritArguments(...ifFalse)
 			.setCompiled(`...${checkExpression}?[${Token.compile(...ifTrue)}]:[${Token.compile(...ifFalse)}]`,
 				Token.rawGenerator(`${checkExpression}?\`${Token.stringify(true, ...ifTrue)}\`:\`${Token.stringify(true, ...ifFalse)}\``));
 
 		if (argument)
-			token.addArgument(argument, "any");
+			token.addArgument(argument, "any", true)
+				.inheritArguments(IArgument.index(argument), ...ifTrue);
+		else
+			token.inheritArguments(...ifTrue);
 
 		return token;
 	});

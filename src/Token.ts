@@ -1,6 +1,7 @@
 export interface IArgument {
 	path: string;
 	type: string;
+	optional: boolean;
 }
 
 export namespace IArgument {
@@ -27,6 +28,17 @@ export namespace IArgument {
 		argumentPath.unshift("a")
 		const accessor = argumentPath.join("");
 		return length ? `l(${accessor})` : accessor;
+	}
+
+	export function index (path: string) {
+		const firstPeriod = path.indexOf(".");
+		const firstKey = firstPeriod === -1 ? path : path.slice(0, firstPeriod);
+		const firstIndex = parseInt(firstKey);
+		return isNaN(firstIndex) ? 0 : firstIndex;
+	}
+
+	export function filteredIndexPresent (presentIndex: number, args: IArgument[]) {
+		return args.map(arg => index(arg.path) === presentIndex ? { ...arg, optional: true } : arg);
 	}
 }
 
@@ -75,16 +87,23 @@ class Token implements IToken {
 	}
 
 	public args: IArgument[] = [];
-	public addArgument (path: string, type: string) {
-		this.args.push({ path, type });
+	public addArgument (path: string, type: string, optional = false) {
+		this.args.push({ path, type, optional });
 		return this;
 	}
 
-	public inheritArguments (...tokens: IToken[]) {
+	public inheritArguments (optional: number, ...tokens: IToken[]): this;
+	public inheritArguments (...tokens: IToken[]): this;
+	public inheritArguments (optional: IToken | number, ...tokens: IToken[]) {
+		if (typeof optional !== "number")
+			tokens.unshift(optional), optional = -1;
+
 		for (const token of tokens)
 			if (token instanceof Token)
-				for (const arg of token.args)
-					this.args.push(arg);
+				for (const arg of token.args) {
+					console.log(optional, arg.path, IArgument.index(arg.path));
+					this.args.push(optional === IArgument.index(arg.path) ? { ...arg, optional: true } : arg);
+				}
 
 		return this;
 	}

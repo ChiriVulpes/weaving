@@ -14,6 +14,8 @@ export default class Weave implements IWarpAPI {
 	private static compileTokens (...tokens: IToken[]) {
 		let compiled = "";
 		const argTypes: Set<string>[] = [];
+		let lastRequiredIndex = -1;
+		const optionals: boolean[] = [];
 
 		for (const token of tokens) {
 			if (!token.compiled)
@@ -21,7 +23,7 @@ export default class Weave implements IWarpAPI {
 
 			compiled += `${token.compiled},`;
 
-			for (const { path, type } of token.args ?? []) {
+			for (const { path, type, optional } of token.args ?? []) {
 				const keys = path.split(".");
 				if (keys.length === 0)
 					continue;
@@ -31,15 +33,29 @@ export default class Weave implements IWarpAPI {
 
 				const generatedType = this.compileType(keys.slice(1), type);
 
-				(argTypes[+keys[0]] ??= new Set()).add(generatedType);
+				const index = +keys[0];
+				(argTypes[index] ??= new Set()).add(generatedType);
+
+				if (!optional)
+					lastRequiredIndex = Math.max(index, lastRequiredIndex);
+
+				optionals[index] ??= true;
+				optionals[index] &&= optional;
 			}
 		}
 
 		let args = "";
 		if (argTypes.length)
 			args = argTypes
-				.map((typeSet, i) => `arg_${i}: ${[...typeSet].join(" & ")}`)
-				.join(",");
+				.map((typeSet, i) => {
+					if (typeSet.size > 1)
+						// prevent `Explicit Types & any`
+						typeSet.delete("any");
+
+					const type = [...typeSet].join(" & ");
+					return `arg_${i}${lastRequiredIndex < i ? "?" : ""}: ${optionals[i] && lastRequiredIndex >= i ? `(${type}) | undefined` : type}`;
+				})
+				.join(", ");
 
 		return {
 			script: `${args ? "(...a)" : "_"}=>c([${compiled}])`,
