@@ -8,20 +8,20 @@
 				"isDefault": true
 			},
 			"type": "shell",
-			"command": "gulp watch",
+			"command": "npx gulp watch",
 			"problemMatcher": []
 		},
 		{
 			"label": "publish",
 			"type": "shell",
 			"group": "build",
-			"command": "gulp compile-test",
+			"command": "npx gulp compile-test",
 			"problemMatcher": []
 		},
 		{
 			"label": "publish",
 			"type": "shell",
-			"command": "gulp publish",
+			"command": "npx gulp publish",
 			"problemMatcher": []
 		}
 	]
