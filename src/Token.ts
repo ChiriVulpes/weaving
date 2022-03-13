@@ -100,10 +100,8 @@ class Token implements IToken {
 
 		for (const token of tokens)
 			if (token instanceof Token)
-				for (const arg of token.args) {
-					console.log(optional, arg.path, IArgument.index(arg.path));
+				for (const arg of token.args)
 					this.args.push(optional === IArgument.index(arg.path) ? { ...arg, optional: true } : arg);
-				}
 
 		return this;
 	}
