@@ -38,7 +38,7 @@ const enum Mode {
 }
 
 function unpathify (dictionary: string) {
-	return dictionary.split(/(?<=[^\\]|(\\\\)+)\//).map(segment => segment.trim());
+	return dictionary.split(/(?<=[^\\]|(?:\\\\)+)\//).map(segment => segment.trim());
 }
 
 function pathify (...path: string[][]) {
