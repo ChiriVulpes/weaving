@@ -12,6 +12,7 @@ const expect = chai.expect;
 // }
 
 const quilt = Weaving.QuiltTransformer.create();
+try { fs.mkdirSync("tests/temp"); } catch { }
 quilt.definitions.pipe(fs.createWriteStream("tests/temp/test.d.ts"));
 fs.createReadStream("tests/test.quilt")
 	.pipe(quilt)

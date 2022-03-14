@@ -12,7 +12,7 @@
 			"problemMatcher": []
 		},
 		{
-			"label": "publish",
+			"label": "build",
 			"type": "shell",
 			"group": "build",
 			"command": "npx gulp compile-test",
