@@ -1,5 +1,4 @@
 {
-	"private": true,
 	"name": "@wayward/weaving",
 	"version": "2.0.0",
 	"description": "A ridiculously powerful and easy-to-use language system. 🚀",
@@ -9,6 +8,11 @@
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/ChiriVulpes/weaving"
+	},
+	"scripts": {
+		"build": "npx gulp compile-test",
+		"watch": "npx gulp watch",
+		"publish": "npx gulp publish"
 	},
 	"devDependencies": {
 		"@types/chai": "4.2.16",

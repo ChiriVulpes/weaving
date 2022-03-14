@@ -69,10 +69,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         const ifFalse = api.tokenise(walker, match.end);
         walker.walkSubstr(...match.end);
         const token = new Token_1.default()
-            .inheritArguments(...ifTrue, ...ifFalse)
+            .inheritArguments(...ifFalse)
             .setCompiled(`...${checkExpression}?[${Token_1.default.compile(...ifTrue)}]:[${Token_1.default.compile(...ifFalse)}]`, Token_1.default.rawGenerator(`${checkExpression}?\`${Token_1.default.stringify(true, ...ifTrue)}\`:\`${Token_1.default.stringify(true, ...ifFalse)}\``));
         if (argument)
-            token.addArgument(argument, "any");
+            token.addArgument(argument, "any", true)
+                .inheritArguments(Token_1.IArgument.index(argument), ...ifTrue);
+        else
+            token.inheritArguments(...ifTrue);
         return token;
     });
 });

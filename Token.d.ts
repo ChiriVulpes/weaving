@@ -1,9 +1,12 @@
 export interface IArgument {
     path: string;
     type: string;
+    optional: boolean;
 }
 export declare namespace IArgument {
     function accessor(path: string): string;
+    function index(path: string): number;
+    function filteredIndexPresent(presentIndex: number, args: IArgument[]): IArgument[];
 }
 export interface IToken {
     compiled?: string;
@@ -26,7 +29,8 @@ declare class Token implements IToken {
     string?: string;
     setCompiled(compiled: IWeft | string, string: string): this;
     args: IArgument[];
-    addArgument(path: string, type: string): this;
+    addArgument(path: string, type: string, optional?: boolean): this;
+    inheritArguments(optional: number, ...tokens: IToken[]): this;
     inheritArguments(...tokens: IToken[]): this;
 }
 declare namespace Token {

@@ -26,29 +26,41 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             return this.compileTokens(...new Weave(source, warps).tokenise());
         }
         static compileTokens(...tokens) {
-            var _a, _b;
-            var _c;
+            var _a, _b, _c;
             let compiled = "";
             const argTypes = [];
+            let lastRequiredIndex = -1;
+            const optionals = [];
             for (const token of tokens) {
                 if (!token.compiled)
                     continue;
                 compiled += `${token.compiled},`;
-                for (const { path, type } of (_a = token.args) !== null && _a !== void 0 ? _a : []) {
+                for (const { path, type, optional } of (_a = token.args) !== null && _a !== void 0 ? _a : []) {
                     const keys = path.split(".");
                     if (keys.length === 0)
                         continue;
                     if (isNaN(+keys[0]))
                         keys.unshift("0");
                     const generatedType = this.compileType(keys.slice(1), type);
-                    ((_b = argTypes[_c = +keys[0]]) !== null && _b !== void 0 ? _b : (argTypes[_c] = new Set())).add(generatedType);
+                    const index = +keys[0];
+                    ((_b = argTypes[index]) !== null && _b !== void 0 ? _b : (argTypes[index] = new Set())).add(generatedType);
+                    if (!optional)
+                        lastRequiredIndex = Math.max(index, lastRequiredIndex);
+                    (_c = optionals[index]) !== null && _c !== void 0 ? _c : (optionals[index] = true);
+                    optionals[index] && (optionals[index] = optional);
                 }
             }
             let args = "";
             if (argTypes.length)
                 args = argTypes
-                    .map((typeSet, i) => `arg_${i}: ${[...typeSet].join(" & ")}`)
-                    .join(",");
+                    .map((typeSet, i) => {
+                    if (typeSet.size > 1)
+                        // prevent `Explicit Types & any`
+                        typeSet.delete("any");
+                    const type = [...typeSet].join(" & ");
+                    return `arg_${i}${lastRequiredIndex < i ? "?" : ""}: ${optionals[i] && lastRequiredIndex >= i ? `(${type}) | undefined` : type}`;
+                })
+                    .join(", ");
             return {
                 script: `${args ? "(...a)" : "_"}=>c([${compiled}])`,
                 definitions: `(${args}): Weave`,

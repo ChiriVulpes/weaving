@@ -36,7 +36,7 @@ declare const quilt: Quilt;
 export default quilt;
 `;
     function unpathify(dictionary) {
-        return dictionary.split(/(?<=[^\\]|(\\\\)+)\//).map(segment => segment.trim());
+        return dictionary.split(/(?<=[^\\]|(?:\\\\)+)\//).map(segment => segment.trim());
     }
     function pathify(...path) {
         return path.flat().join("/");

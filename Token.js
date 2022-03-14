@@ -33,6 +33,17 @@
             return length ? `l(${accessor})` : accessor;
         }
         IArgument.accessor = accessor;
+        function index(path) {
+            const firstPeriod = path.indexOf(".");
+            const firstKey = firstPeriod === -1 ? path : path.slice(0, firstPeriod);
+            const firstIndex = parseInt(firstKey);
+            return isNaN(firstIndex) ? 0 : firstIndex;
+        }
+        IArgument.index = index;
+        function filteredIndexPresent(presentIndex, args) {
+            return args.map(arg => index(arg.path) === presentIndex ? { ...arg, optional: true } : arg);
+        }
+        IArgument.filteredIndexPresent = filteredIndexPresent;
     })(IArgument = exports.IArgument || (exports.IArgument = {}));
     var IWeft;
     (function (IWeft) {
@@ -62,15 +73,17 @@
             this.string = string;
             return this;
         }
-        addArgument(path, type) {
-            this.args.push({ path, type });
+        addArgument(path, type, optional = false) {
+            this.args.push({ path, type, optional });
             return this;
         }
-        inheritArguments(...tokens) {
+        inheritArguments(optional, ...tokens) {
+            if (typeof optional !== "number")
+                tokens.unshift(optional), optional = -1;
             for (const token of tokens)
                 if (token instanceof Token)
                     for (const arg of token.args)
-                        this.args.push(arg);
+                        this.args.push(optional === IArgument.index(arg.path) ? { ...arg, optional: true } : arg);
             return this;
         }
     }
