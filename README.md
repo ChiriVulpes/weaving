@@ -88,10 +88,11 @@ export default new Warp()
 	.setTokeniser((walker, match, api) => {
 		// When Weaving encounters an opening curly brace { it goes through all the warps, 
 		// running through their tokenisers to check if they apply.
-		// When execution reaches this tokeniser, we begin consuming what we expect to see in our custom interpolation.
+		// When execution reaches this tokeniser, we begin consuming 
+		// what we expect to see in our custom interpolation.
 		
-		// If the walker fails to walk over something, it returns false, and in those cases it means 
-		// this is either a different kind of interpolation or a malformed one.
+		// If the walker fails to walk over something, it returns false, and in those cases 
+		// it means this is either a different kind of interpolation or a malformed one.
 		// In either case we don't want to tokenise it with our warp, so we return `undefined`.
 		
 		// First, we allow any amount of whitespace after the opening curly brace
