@@ -40,7 +40,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (!argument)
             return undefined;
         walker.walkWhitespace();
-        walker.walkSubstr(...match.end);
         const accessor = Token_1.IArgument.accessor(argument);
         return new Token_1.default()
             .addArgument(argument, "any")

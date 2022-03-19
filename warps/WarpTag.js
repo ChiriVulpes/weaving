@@ -45,7 +45,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         const content = api.tokenise(walker, match.end);
         if (!content)
             return undefined;
-        walker.walkSubstr(...match.end);
         return new Token_1.default()
             .inheritArguments(...tag, ...content)
             // TODO optimise output here by compressing a single token into this object

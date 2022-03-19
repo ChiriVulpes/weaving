@@ -3,6 +3,7 @@ export default class StringWalker {
     cursor: number;
     get char(): string | undefined;
     get nextChar(): string | undefined;
+    get ended(): boolean;
     constructor(str: string);
     prev(): string | undefined;
     next(): string | undefined;

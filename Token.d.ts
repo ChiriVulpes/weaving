@@ -27,6 +27,7 @@ declare class Token implements IToken {
     static rawGenerator(generator: string): string;
     compiled?: string;
     string?: string;
+    setCompiled(compiled: string, string?: string): this;
     setCompiled(compiled: IWeft | string, string: string): this;
     args: IArgument[];
     addArgument(path: string, type: string, optional?: boolean): this;

@@ -10,7 +10,7 @@ export default class Weave implements IWarpAPI {
     };
     private static compileTokens;
     private static compileType;
-    static defaultWarps: Warp[];
+    static DEFAULT_WARPS: Warp[];
     constructor(raw: string, warps?: Warp[]);
     tokenise(walker?: StringWalker, until?: string[]): IToken[];
     tokeniseWarp(walker: StringWalker, warps: Set<Warp>): IToken[] | undefined;

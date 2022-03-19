@@ -38,6 +38,7 @@
         }
         get char() { return this.str[this.cursor]; }
         get nextChar() { return this.str[this.cursor + 1]; }
+        get ended() { return this.cursor >= this.str.length; }
         prev() {
             --this.cursor;
             return this.char;

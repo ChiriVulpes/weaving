@@ -18,12 +18,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const WarpConditional_1 = __importDefault(require("./warps/WarpConditional"));
     const WarpTag_1 = __importDefault(require("./warps/WarpTag"));
     class Weave {
-        constructor(raw, warps = Weave.defaultWarps) {
+        constructor(raw, warps = Weave.DEFAULT_WARPS) {
             this.raw = raw;
             this.warps = warps;
         }
         static compile(source, warps) {
-            return this.compileTokens(...new Weave(source, warps).tokenise());
+            return Weave.compileTokens(...new Weave(source, warps).tokenise());
         }
         static compileTokens(...tokens) {
             var _a, _b, _c;
@@ -109,6 +109,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 const warpTokens = (_a = warp.tokenise) === null || _a === void 0 ? void 0 : _a.call(warp, warpWalker, match, this);
                 if (!warpTokens)
                     continue;
+                if (!warpWalker.walkSubstr(...match.end) && !warpWalker.ended)
+                    continue;
                 walker.walkTo(warpWalker.cursor);
                 return arrayOr(warpTokens);
             }
@@ -135,7 +137,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         }
     }
     exports.default = Weave;
-    Weave.defaultWarps = [
+    Weave.DEFAULT_WARPS = [
         WarpTag_1.default,
         WarpConditional_1.default,
         WarpArgument_1.default,

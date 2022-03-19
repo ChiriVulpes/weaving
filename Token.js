@@ -70,7 +70,7 @@
         }
         setCompiled(compiled, string) {
             this.compiled = typeof compiled === "string" ? compiled : IWeft.compile(compiled);
-            this.string = string;
+            this.string = string === undefined ? compiled : string;
             return this;
         }
         addArgument(path, type, optional = false) {

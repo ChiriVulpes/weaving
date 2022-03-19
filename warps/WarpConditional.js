@@ -67,7 +67,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         const ifTrue = api.tokenise(walker, [":", ...match.end]);
         walker.walkSubstr(":");
         const ifFalse = api.tokenise(walker, match.end);
-        walker.walkSubstr(...match.end);
         const token = new Token_1.default()
             .inheritArguments(...ifFalse)
             .setCompiled(`...${checkExpression}?[${Token_1.default.compile(...ifTrue)}]:[${Token_1.default.compile(...ifFalse)}]`, Token_1.default.rawGenerator(`${checkExpression}?\`${Token_1.default.stringify(true, ...ifTrue)}\`:\`${Token_1.default.stringify(true, ...ifFalse)}\``));

@@ -42,7 +42,8 @@ export default quilt;
         return path.flat().join("/");
     }
     class Quilt {
-        constructor(warps) {
+        constructor(options, warps) {
+            this.options = options;
             this.warps = warps;
             this.dictionaries = [];
             this.mode = 0 /* CommentOrDictionaryOrEntry */;
@@ -215,13 +216,14 @@ export default quilt;
             return this;
         }
         pushEntry(pendingEntry = this.pendingEntry, pendingTranslation = this.pendingTranslation) {
-            var _a, _b;
+            var _a, _b, _c, _d;
             const entry = pathify(...this.dictionaries, unpathify(pendingEntry));
             if (pendingTranslation[0] === " ")
                 pendingTranslation = pendingTranslation.trim();
-            const translation = Weave_1.default.compile(pendingTranslation, this.warps);
-            (_a = this.scriptConsumer) === null || _a === void 0 ? void 0 : _a.call(this, `"${entry}":${translation.script},`);
-            (_b = this.definitionsConsumer) === null || _b === void 0 ? void 0 : _b.call(this, `\t"${entry}"${translation.definitions};\n`);
+            const compile = (_b = (_a = this.options) === null || _a === void 0 ? void 0 : _a.weave) !== null && _b !== void 0 ? _b : Weave_1.default.compile;
+            const translation = compile(pendingTranslation, this.warps);
+            (_c = this.scriptConsumer) === null || _c === void 0 ? void 0 : _c.call(this, `"${entry}":${translation.script},`);
+            (_d = this.definitionsConsumer) === null || _d === void 0 ? void 0 : _d.call(this, `\t"${entry}"${translation.definitions};\n`);
         }
     }
     exports.default = Quilt;
