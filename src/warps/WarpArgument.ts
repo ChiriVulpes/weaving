@@ -9,7 +9,6 @@ export default new Warp()
 			return undefined;
 
 		walker.walkWhitespace();
-		walker.walkSubstr(...match.end);
 
 		const accessor = IArgument.accessor(argument);
 		return new Token()

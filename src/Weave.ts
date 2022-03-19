@@ -8,7 +8,7 @@ import WarpTag from "./warps/WarpTag";
 export default class Weave implements IWarpAPI {
 
 	public static compile (source: string, warps?: Warp[]) {
-		return this.compileTokens(...new Weave(source, warps).tokenise());
+		return Weave.compileTokens(...new Weave(source, warps).tokenise());
 	}
 
 	private static compileTokens (...tokens: IToken[]) {
@@ -70,13 +70,13 @@ export default class Weave implements IWarpAPI {
 		return result;
 	}
 
-	public static defaultWarps: Warp[] = [
+	public static DEFAULT_WARPS: Warp[] = [
 		WarpTag,
 		WarpConditional,
 		WarpArgument,
 	];
 
-	public constructor (private readonly raw: string, private readonly warps = Weave.defaultWarps) {
+	public constructor (private readonly raw: string, private readonly warps = Weave.DEFAULT_WARPS) {
 	}
 
 	public tokenise (walker = new StringWalker(this.raw), until?: string[]) {
@@ -121,6 +121,9 @@ export default class Weave implements IWarpAPI {
 		for (const [warp, match, warpWalker] of matching) {
 			const warpTokens = warp.tokenise?.(warpWalker, match, this);
 			if (!warpTokens)
+				continue;
+
+			if (!warpWalker.walkSubstr(...match.end) && !warpWalker.ended)
 				continue;
 
 			walker.walkTo(warpWalker.cursor);

@@ -1,7 +1,7 @@
 import chai from "chai";
 import chaiAsPromised from "chai-as-promised";
-import * as fs from "fs";
-import * as Weaving from "../build/Weaving";
+import fs from "fs";
+import Weaving from "../build/Weaving";
 
 chai.use(chaiAsPromised);
 // @ts-ignore
@@ -11,8 +11,9 @@ const expect = chai.expect;
 // 	return new Promise<T>(resolve => setTimeout(() => resolve(returnValue), ms));
 // }
 
-const quilt = Weaving.QuiltTransformer.create();
 try { fs.mkdirSync("tests/temp"); } catch { }
+
+const quilt = Weaving.createQuiltTransformer();
 quilt.definitions.pipe(fs.createWriteStream("tests/temp/test.d.ts"));
 fs.createReadStream("tests/test.quilt")
 	.pipe(quilt)

@@ -43,8 +43,6 @@ export default new Warp()
 		walker.walkSubstr(":");
 		const ifFalse = api.tokenise(walker, match.end);
 
-		walker.walkSubstr(...match.end);
-
 		const token = new Token()
 			.inheritArguments(...ifFalse)
 			.setCompiled(`...${checkExpression}?[${Token.compile(...ifTrue)}]:[${Token.compile(...ifFalse)}]`,

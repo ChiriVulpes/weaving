@@ -80,9 +80,11 @@ class Token implements IToken {
 
 	public compiled?: string;
 	public string?: string;
-	public setCompiled (compiled: IWeft | string, string: string) {
+	public setCompiled (compiled: string, string?: string): this;
+	public setCompiled (compiled: IWeft | string, string: string): this;
+	public setCompiled (compiled: IWeft | string, string?: string) {
 		this.compiled = typeof compiled === "string" ? compiled : IWeft.compile(compiled);
-		this.string = string;
+		this.string = string === undefined ? compiled as string : string;
 		return this;
 	}
 

@@ -45,9 +45,14 @@ function pathify (...path: string[][]) {
 	return path.flat().join("/");
 }
 
+export interface IQuiltOptions {
+	/** Replace the default weaving function with an edited implementation. The default implementation resides in `Weave.compile` */
+	weave?: typeof Weave.compile;
+}
+
 export default class Quilt {
 
-	public constructor (private readonly warps?: Warp[]) {
+	public constructor (private readonly options?: IQuiltOptions, private readonly warps?: Warp[]) {
 	}
 
 	private scriptConsumer?: (chunk: string) => any;
@@ -253,7 +258,8 @@ export default class Quilt {
 		const entry = pathify(...this.dictionaries, unpathify(pendingEntry));
 		if (pendingTranslation[0] === " ")
 			pendingTranslation = pendingTranslation.trim();
-		const translation = Weave.compile(pendingTranslation, this.warps);
+		const compile = this.options?.weave ?? Weave.compile;
+		const translation = compile(pendingTranslation, this.warps);
 		this.scriptConsumer?.(`"${entry}":${translation.script},`);
 		this.definitionsConsumer?.(`\t"${entry}"${translation.definitions};\n`);
 	}

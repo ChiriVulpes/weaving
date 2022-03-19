@@ -28,6 +28,7 @@ export default class StringWalker {
 	public cursor = 0;
 	public get char (): string | undefined { return this.str[this.cursor]; }
 	public get nextChar (): string | undefined { return this.str[this.cursor + 1]; }
+	public get ended () { return this.cursor >= this.str.length; }
 
 	public constructor (public readonly str: string) { }
 

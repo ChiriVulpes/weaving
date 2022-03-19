@@ -16,8 +16,6 @@ export default new Warp()
 		if (!content)
 			return undefined;
 
-		walker.walkSubstr(...match.end);
-
 		return new Token()
 			.inheritArguments(...tag, ...content)
 			// TODO optimise output here by compressing a single token into this object

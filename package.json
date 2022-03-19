@@ -1,6 +1,6 @@
 {
 	"private": true,
-	"name": "@wayward/weaving",
+	"name": "weaving",
 	"version": "2.0.0",
 	"description": "A ridiculously powerful and easy-to-use language system. 🚀",
 	"license": "MIT",
@@ -27,6 +27,7 @@
 		"@types/node": "^12.7.3",
 		"@typescript-eslint/eslint-plugin": "4.15.2",
 		"@typescript-eslint/parser": "4.15.2",
+		"@types/vinyl": "2.0.6",
 		"chai": "4.3.4",
 		"chai-as-promised": "7.1.1",
 		"chalk": "4.1.0",
