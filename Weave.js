@@ -50,6 +50,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     optionals[index] && (optionals[index] = optional);
                 }
             }
+            compiled = compiled.slice(0, -1);
             let args = "";
             if (argTypes.length)
                 args = argTypes
@@ -115,6 +116,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 return arrayOr(warpTokens);
             }
             return undefined;
+        }
+        with(warps) {
+            return new Weave(this.raw, [...warps, ...this.warps]);
         }
         /**
          * @returns A Record mapping all warps to the first character of each of their starts

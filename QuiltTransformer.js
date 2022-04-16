@@ -26,10 +26,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             }
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
                 : new ReadableStream({ start: controller => { definitionsController = controller; } }));
+            const errors = [];
             const quilt = new Quilt_1.default(options, warps)
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call
                 .onScript(chunk => nodeMode ? this.push(chunk) : controller.enqueue(chunk))
-                .onDefinitions(chunk => nodeMode ? this.definitions.push(chunk) : definitionsController.enqueue(chunk));
+                .onDefinitions(chunk => nodeMode ? this.definitions.push(chunk) : definitionsController.enqueue(chunk))
+                .onError(error => errors.push(error));
             // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             super(...nodeMode ? [] : [{
                     start: (c) => {
@@ -44,10 +46,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     flush: () => {
                         quilt.complete();
                         definitionsController.close();
+                        for (const error of errors)
+                            controller.error(error);
                     },
                 }]);
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             this.definitions = definitions;
+            this.errors = errors;
             if (nodeMode) {
                 this.quilt = quilt;
                 this.quilt.start();
@@ -111,8 +116,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         }
         _flush(cb) {
             this.quilt.complete();
+            for (const error of this.errors)
+                this.emit("error", error);
             this.definitions.destroy();
-            cb();
+            cb(this.errors.length ? new Error(`${this.errors.length} errors`) : undefined);
         }
     }
     exports.default = QuiltTransformer;

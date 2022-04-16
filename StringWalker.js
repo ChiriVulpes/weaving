@@ -74,6 +74,8 @@
         walkArgument() {
             var _a, _b;
             let argument = "";
+            if (this.walkChar("&"))
+                argument += "&";
             let char = this.char;
             do {
                 const n = char.charCodeAt(0);

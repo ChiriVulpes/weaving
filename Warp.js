@@ -21,8 +21,8 @@
             this._matches.push(...matches);
             return this;
         }
-        setTokeniser(tokeniser) {
-            this.tokenise = tokeniser;
+        setTokeniser(tokeniser, ...args) {
+            this.tokenise = (walker, match, api) => tokeniser(walker, match, api, ...args);
             return this;
         }
     }

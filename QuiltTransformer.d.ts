@@ -21,6 +21,7 @@ export default class QuiltTransformer extends ExtensionClass {
     static createFileTransformer(options?: IQuiltFileTransformerOptions, warps?: Warp[]): Transform;
     private readonly quilt;
     readonly definitions: Readable & ReadableStream;
+    readonly errors: Error[];
     private constructor();
     _transform(chunk: Buffer, enc: string, cb: TransformCallback): void;
     _flush(cb: TransformCallback): void;

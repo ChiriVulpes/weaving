@@ -12,12 +12,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    exports.QuiltError = void 0;
     const Weave_1 = __importDefault(require("./Weave"));
     const UMD_HEADER = "(function(factory){if(typeof module===\"object\"&&typeof module.exports===\"object\"){var v=factory(require, exports);if(v!==undefined)module.exports=v}else if(typeof define===\"function\"&&define.amd){define([\"require\",\"exports\"],factory);}})(function(require,exports){\"use strict\";Object.defineProperty(exports,\"__esModule\",{value:true});";
     const UMD_FOOTER = "})";
-    const FUNCTION_STRINGIFY = "let s=t=>Array.isArray(t)?t.map(s).join(\"\"):typeof t.content==\"object\"?s(t.content):t.content;";
-    const FUNCTION_CONTENT = "let c=c=>({content:c,toString(){return s(this.content)}});";
-    const FUNCTION_LENGTH = "let l=v=>!v?0:typeof v.length==\"number\"?v.length:typeof v.size==\"number\"?v.size:(typeof v==\"object\"||typeof v==\"function\")&&Symbol.iterator in v?[...v].length:typeof v==\"object\"?Object.keys(v).length:0;";
+    const FUNCTIONS = {
+        STRINGIFY: "let s=t=>Array.isArray(t)?t.map(s).join(\"\"):typeof t.content==\"object\"?s(t.content):t.content;",
+        IS_ITERABLE: "let ii=u=>(typeof u==\"object\"||typeof u==\"function\")&&Symbol.iterator in u;",
+        CONTENT: "let c=c=>({content:c,toString(){return s(this.content)}});",
+        JOIN: "let j=(a,s,v)=>{a=(!a?[]:Array.isArray(a)?a:ii(a)?[...a]:[a]);a=v?a.map(v):a;return a.join(s)};",
+        LENGTH: "let l=v=>!v?0:typeof v.length==\"number\"?v.length:typeof v.size==\"number\"?v.size:ii(v)?[...v].length:typeof v==\"object\"?Object.keys(v).length:0;",
+    };
     const QUILT_HEADER = `
 export type StringResolvable = string | Weave;
 
@@ -41,6 +46,14 @@ export default quilt;
     function pathify(...path) {
         return path.flat().join("/");
     }
+    class QuiltError extends Error {
+        constructor(reason, line, column) {
+            super(reason);
+            this.line = line;
+            this.column = column;
+        }
+    }
+    exports.QuiltError = QuiltError;
     class Quilt {
         constructor(options, warps) {
             this.options = options;
@@ -53,6 +66,8 @@ export default quilt;
             this.nextEscaped = false;
             this.pendingTranslation = "";
             this.pendingTranslationOrEntry = "";
+            this.line = 0;
+            this.column = 0;
         }
         onScript(consumer) {
             this.scriptConsumer = consumer;
@@ -62,11 +77,19 @@ export default quilt;
             this.definitionsConsumer = consumer;
             return this;
         }
+        onError(consumer) {
+            this.errorConsumer = consumer;
+            return this;
+        }
         start() {
             var _a, _b;
-            (_a = this.scriptConsumer) === null || _a === void 0 ? void 0 : _a.call(this, `${UMD_HEADER}${FUNCTION_STRINGIFY}${FUNCTION_CONTENT}${FUNCTION_LENGTH}exports.default={`);
+            (_a = this.scriptConsumer) === null || _a === void 0 ? void 0 : _a.call(this, `${UMD_HEADER}${Object.values(FUNCTIONS).join("")}exports.default={`);
             (_b = this.definitionsConsumer) === null || _b === void 0 ? void 0 : _b.call(this, QUILT_HEADER);
             return this;
+        }
+        error(reason) {
+            var _a;
+            (_a = this.errorConsumer) === null || _a === void 0 ? void 0 : _a.call(this, new QuiltError(reason, this.line, this.column));
         }
         transform(chunk) {
             let mode = this.mode;
@@ -78,6 +101,10 @@ export default quilt;
             let pendingTranslationOrEntry = this.pendingTranslationOrEntry;
             for (let i = 0; i < chunk.length; i++) {
                 const char = chunk[i];
+                if (char === "\n")
+                    this.line++, this.column = 0;
+                else
+                    this.column++;
                 switch (mode) {
                     case 0 /* CommentOrDictionaryOrEntry */:
                         mode = char === "#" ? 2 /* DictionaryLevel */ : 1 /* CommentOrEntry */;

@@ -14,6 +14,7 @@ export default class Weave implements IWarpAPI {
     constructor(raw: string, warps?: Warp[]);
     tokenise(walker?: StringWalker, until?: string[]): IToken[];
     tokeniseWarp(walker: StringWalker, warps: Set<Warp>): IToken[] | undefined;
+    with(warps: Warp[]): Weave;
     private warpCache?;
     /**
      * @returns A Record mapping all warps to the first character of each of their starts

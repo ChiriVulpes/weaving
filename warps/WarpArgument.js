@@ -17,9 +17,6 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 (function (factory) {
     if (typeof module === "object" && typeof module.exports === "object") {
         var v = factory(require, exports);
@@ -31,18 +28,45 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    exports.tokeniseArgument = void 0;
     const Token_1 = __importStar(require("../Token"));
-    const Warp_1 = __importDefault(require("../Warp"));
+    const Warp_1 = __importStar(require("../Warp"));
     exports.default = new Warp_1.default()
-        .setTokeniser((walker, match, api) => {
+        .setTokeniser(tokeniseArgument);
+    class ValueToken extends Token_1.default {
+        constructor() {
+            super(...arguments);
+            this.compiled = "&";
+            this.string = "&";
+        }
+    }
+    const WarpValue = new Warp_1.default()
+        .match(new Warp_1.Match().setStart("&").setEnd(""))
+        .setTokeniser(() => new ValueToken);
+    function tokeniseArgument(walker, match, api, valueMode = false) {
+        var _a;
         walker.walkWhitespace();
-        const argument = walker.walkArgument();
-        if (!argument)
+        const argument = (_a = walker.walkArgument()) !== null && _a !== void 0 ? _a : "";
+        if (argument)
+            walker.walkWhitespace();
+        const join = walker.walkChar("*");
+        if (!argument && !join && !valueMode)
             return undefined;
-        walker.walkWhitespace();
-        const accessor = Token_1.IArgument.accessor(argument);
+        let accessor = Token_1.IArgument.accessor(argument);
+        if (join) {
+            let entryTokens;
+            let separatorTokens = api.with([WarpValue]).tokenise(walker, [...match.end, ":"]);
+            if (walker.walkChar(":")) {
+                entryTokens = separatorTokens;
+                separatorTokens = api.tokenise(walker, match.end);
+            }
+            const entry = !entryTokens ? ""
+                : `,v=>c([${entryTokens.map(token => token instanceof ValueToken ? "{content:v}" : token.compiled).join(",")}])`;
+            accessor = `j(${accessor},\`${separatorTokens.map(token => { var _a; return (_a = token.string) !== null && _a !== void 0 ? _a : ""; }).join("")}\`${entry})`;
+        }
         return new Token_1.default()
             .addArgument(argument, "any")
             .setCompiled({ content: accessor }, Token_1.default.rawGenerator(accessor));
-    });
+    }
+    exports.tokeniseArgument = tokeniseArgument;
 });

@@ -14,21 +14,25 @@
     (function (IArgument) {
         const REGEX_WORD = /^\w+$/;
         function accessor(path) {
+            const valueMode = path.startsWith("&");
+            if (valueMode)
+                path = path.slice(1);
             const length = path.endsWith("..");
             if (length)
                 path = path.slice(0, -2);
-            let argumentPath = path.split(".")
-                .map(argument => 
-            // numeric key
-            !isNaN(parseInt(argument)) ? `[${argument}]`
-                // string key
-                : REGEX_WORD.test(argument) ? `${argument}`
-                    // string key (invalid characters)
-                    : `["${argument}"]`);
-            if (argumentPath[0][0] !== "[" || argumentPath[0][1] === "\"")
+            let argumentPath = path.length === 0 ? []
+                : path.split(".")
+                    .map(argument => 
+                // numeric key
+                !isNaN(parseInt(argument)) ? `[${argument}]`
+                    // string key
+                    : REGEX_WORD.test(argument) ? `${argument}`
+                        // string key (invalid characters)
+                        : `["${argument}"]`);
+            if (!valueMode && argumentPath.length && (argumentPath[0][0] !== "[" || argumentPath[0][1] === "\""))
                 argumentPath.unshift("[0]");
-            argumentPath = argumentPath.map((argument, i) => i ? `?.${argument}` : argument);
-            argumentPath.unshift("a");
+            argumentPath = argumentPath.map((argument, i) => i || valueMode ? `?.${argument}` : argument);
+            argumentPath.unshift(valueMode ? "v" : "a");
             const accessor = argumentPath.join("");
             return length ? `l(${accessor})` : accessor;
         }
@@ -56,6 +60,8 @@
     class Token {
         constructor() {
             this.args = [];
+            // public require (fn: string) {
+            // }
         }
         static compile(...tokens) {
             return tokens.map(token => { var _a; return (_a = token.compiled) !== null && _a !== void 0 ? _a : "\"\""; }).join(",");
