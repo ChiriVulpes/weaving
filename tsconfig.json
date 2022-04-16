@@ -15,7 +15,8 @@
         "noImplicitReturns": true,
         "noUnusedLocals": true,
         "noUnusedParameters": false,
-        "strictPropertyInitialization": false
+        "strictPropertyInitialization": false,
+        "allowSyntheticDefaultImports": true
     },
     "include": [
         "gulpfile.ts",

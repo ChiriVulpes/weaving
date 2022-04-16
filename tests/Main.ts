@@ -26,7 +26,19 @@ fs.createReadStream("tests/test.quilt")
 		try {
 			const quilt = require("./temp/test.js").default;
 			for (const key in quilt) {
-				const result = quilt[key]({ NAME: "joe", REMAINING: { hi: true, wow: false } }, 2, 3);
+				const result = quilt[key]({
+					PEOPLE: [
+						{
+							FIRST: "Hue", NICK: "Not an Alien", LAST: "Mann",
+							CHILDREN: [
+								{ FIRST: "Undulating", NICK: "Swarm of Bees", LAST: "Mass" },
+								{ FIRST: "Final", NICK: "Cube", LAST: "Shape" },
+							],
+						},
+						{ FIRST: "Chiri", NICK: "Smolest Bean", LAST: "Vulpes" },
+					],
+					THINGS: ["Pineapple", "Banana", "Fudge Sundae"],
+				});
 				console.log(key, result.content, result.toString());
 			}
 		} catch (err: any) {

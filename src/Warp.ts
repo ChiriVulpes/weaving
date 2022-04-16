@@ -4,7 +4,10 @@ import { IToken } from "./Token";
 export interface IWarpAPI {
 	tokenise (walker: StringWalker, until?: string[]): IToken[];
 	tokeniseWarp (walker: StringWalker, warps: Iterable<Warp>): IToken[] | undefined;
+	with (warps: Warp[]): IWarpAPI;
 }
+
+export type Tokeniser<ARGS extends any[] = []> = (walker: StringWalker, match: Match, api: IWarpAPI, ...args: ARGS) => IToken | IToken[] | undefined;
 
 export default class Warp {
 
@@ -18,9 +21,9 @@ export default class Warp {
 		return this;
 	}
 
-	public tokenise?: (walker: StringWalker, match: Match, api: IWarpAPI) => IToken | IToken[] | undefined;
-	public setTokeniser (tokeniser: (walker: StringWalker, match: Match, api: IWarpAPI) => IToken | IToken[] | undefined) {
-		this.tokenise = tokeniser;
+	public tokenise?: Tokeniser<[]>;
+	public setTokeniser<ARGS extends any[]> (tokeniser: Tokeniser<ARGS>, ...args: ARGS) {
+		this.tokenise = (walker, match, api) => tokeniser(walker, match, api, ...args);
 		return this;
 	}
 }

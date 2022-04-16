@@ -7,25 +7,30 @@ export interface IArgument {
 export namespace IArgument {
 	const REGEX_WORD = /^\w+$/;
 	export function accessor (path: string) {
+		const valueMode = path.startsWith("&");
+		if (valueMode)
+			path = path.slice(1);
+
 		const length = path.endsWith("..");
 		if (length)
 			path = path.slice(0, -2);
 
-		let argumentPath = path.split(".")
-			.map(argument =>
-				// numeric key
-				!isNaN(parseInt(argument)) ? `[${argument}]`
-					// string key
-					: REGEX_WORD.test(argument) ? `${argument}`
-						// string key (invalid characters)
-						: `["${argument}"]`);
+		let argumentPath = path.length === 0 ? []
+			: path.split(".")
+				.map(argument =>
+					// numeric key
+					!isNaN(parseInt(argument)) ? `[${argument}]`
+						// string key
+						: REGEX_WORD.test(argument) ? `${argument}`
+							// string key (invalid characters)
+							: `["${argument}"]`);
 
-		if (argumentPath[0][0] !== "[" || argumentPath[0][1] === "\"")
+		if (!valueMode && argumentPath.length && (argumentPath[0][0] !== "[" || argumentPath[0][1] === "\""))
 			argumentPath.unshift("[0]");
 
-		argumentPath = argumentPath.map((argument, i) => i ? `?.${argument}` : argument)
+		argumentPath = argumentPath.map((argument, i) => i || valueMode ? `?.${argument}` : argument);
 
-		argumentPath.unshift("a")
+		argumentPath.unshift(valueMode ? "v" : "a");
 		const accessor = argumentPath.join("");
 		return length ? `l(${accessor})` : accessor;
 	}
@@ -107,6 +112,10 @@ class Token implements IToken {
 
 		return this;
 	}
+
+	// public require (fn: string) {
+
+	// }
 }
 
 namespace Token {

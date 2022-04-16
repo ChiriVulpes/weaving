@@ -93,6 +93,7 @@ export default class QuiltTransformer extends ExtensionClass {
 
 	// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-var-requires, @typescript-eslint/no-empty-function
 	public readonly definitions: Readable & ReadableStream;
+	public readonly errors: Error[];
 
 	private constructor (options?: IQuiltOptions, warps?: Warp[]) {
 		let definitionsController!: ReadableStreamController<any>;
@@ -103,10 +104,12 @@ export default class QuiltTransformer extends ExtensionClass {
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
 			: new ReadableStream({ start: controller => { definitionsController = controller; } })) as any;
 
+		const errors: Error[] = [];
 		const quilt = new Quilt(options, warps)
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call
 			.onScript(chunk => nodeMode ? this.push(chunk) : controller.enqueue(chunk))
-			.onDefinitions(chunk => nodeMode ? (this.definitions as Readable).push(chunk) : definitionsController.enqueue(chunk));
+			.onDefinitions(chunk => nodeMode ? (this.definitions as Readable).push(chunk) : definitionsController.enqueue(chunk))
+			.onError(error => errors.push(error));
 
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
 		super(...nodeMode ? [] : [{
@@ -122,11 +125,14 @@ export default class QuiltTransformer extends ExtensionClass {
 			flush: () => {
 				quilt.complete();
 				definitionsController.close();
+				for (const error of errors)
+					controller.error(error);
 			},
 		} as Transformer]);
 
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 		this.definitions = definitions;
+		this.errors = errors;
 
 		if (nodeMode) {
 			this.quilt = quilt;
@@ -141,7 +147,9 @@ export default class QuiltTransformer extends ExtensionClass {
 
 	public override _flush (cb: TransformCallback) {
 		this.quilt.complete();
+		for (const error of this.errors)
+			this.emit("error", error);
 		(this.definitions as Readable).destroy();
-		cb();
+		cb(this.errors.length ? new Error(`${this.errors.length} errors`) : undefined);
 	}
 }

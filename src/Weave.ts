@@ -44,6 +44,8 @@ export default class Weave implements IWarpAPI {
 			}
 		}
 
+		compiled = compiled.slice(0, -1);
+
 		let args = "";
 		if (argTypes.length)
 			args = argTypes
@@ -131,6 +133,10 @@ export default class Weave implements IWarpAPI {
 		}
 
 		return undefined;
+	}
+
+	public with (warps: Warp[]) {
+		return new Weave(this.raw, [...warps, ...this.warps]);
 	}
 
 	private warpCache?: Record<string, Set<Warp> | undefined>;
