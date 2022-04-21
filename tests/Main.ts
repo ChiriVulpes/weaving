@@ -38,7 +38,7 @@ fs.createReadStream("tests/test.quilt")
 						{ FIRST: "Chiri", NICK: "Smolest Bean", LAST: "Vulpes" },
 					],
 					THINGS: ["Pineapple", "Banana", "Fudge Sundae"],
-				});
+				}, "hi", "wow");
 				console.log(key, result.content, result.toString());
 			}
 		} catch (err: any) {

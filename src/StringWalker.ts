@@ -89,7 +89,7 @@ export default class StringWalker {
 			argument += char;
 		} while (char = this.next());
 
-		if (argument && this.walkWhitespace().walkSubstr(".."))
+		if (this.walkWhitespace().walkSubstr(".."))
 			argument += "..";
 
 		return argument || undefined;
