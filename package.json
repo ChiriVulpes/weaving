@@ -13,7 +13,7 @@
 	"scripts": {
 		"build": "npx gulp compile-test",
 		"watch": "npx gulp watch",
-		"publish": "npx gulp publish"
+		"pub": "npx gulp publish"
 	},
 	"dependencies": {
 		"yargs": "17.3.1",
