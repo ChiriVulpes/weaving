@@ -31,18 +31,9 @@ var __importStar = (this && this.__importStar) || function (mod) {
     exports.tokeniseArgument = void 0;
     const Token_1 = __importStar(require("../Token"));
     const Warp_1 = __importStar(require("../Warp"));
+    // basic warp matching anything inside {}
     exports.default = new Warp_1.default()
         .setTokeniser(tokeniseArgument);
-    class ValueToken extends Token_1.default {
-        constructor() {
-            super(...arguments);
-            this.compiled = "&";
-            this.string = "&";
-        }
-    }
-    const WarpValue = new Warp_1.default()
-        .match(new Warp_1.Match().setStart("&").setEnd(""))
-        .setTokeniser(() => new ValueToken);
     function tokeniseArgument(walker, match, api, valueMode = false) {
         var _a;
         walker.walkWhitespace();
@@ -69,4 +60,15 @@ var __importStar = (this && this.__importStar) || function (mod) {
             .setCompiled({ content: accessor }, Token_1.default.rawGenerator(accessor));
     }
     exports.tokeniseArgument = tokeniseArgument;
+    // internal warp for matching & inside a join warp
+    const WarpValue = new Warp_1.default()
+        .match(new Warp_1.Match().setStart("&").setEnd(""))
+        .setTokeniser(() => new ValueToken);
+    class ValueToken extends Token_1.default {
+        constructor() {
+            super(...arguments);
+            this.compiled = "&";
+            this.string = "&";
+        }
+    }
 });
