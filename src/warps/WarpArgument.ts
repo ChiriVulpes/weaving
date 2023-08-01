@@ -2,17 +2,9 @@ import StringWalker from "../StringWalker";
 import Token, { IArgument, IToken } from "../Token";
 import Warp, { IWarpAPI, Match } from "../Warp";
 
+// basic warp matching anything inside {}
 export default new Warp()
 	.setTokeniser(tokeniseArgument);
-
-class ValueToken extends Token {
-	public override compiled = "&";
-	public override string = "&";
-}
-
-const WarpValue = new Warp()
-	.match(new Match().setStart("&").setEnd(""))
-	.setTokeniser(() => new ValueToken);
 
 export function tokeniseArgument (walker: StringWalker, match: Match, api: IWarpAPI, valueMode = false) {
 	walker.walkWhitespace();
@@ -42,4 +34,14 @@ export function tokeniseArgument (walker: StringWalker, match: Match, api: IWarp
 	return new Token()
 		.addArgument(argument, "any")
 		.setCompiled({ content: accessor }, Token.rawGenerator(accessor));
+}
+
+// internal warp for matching & inside a join warp
+const WarpValue = new Warp()
+	.match(new Match().setStart("&").setEnd(""))
+	.setTokeniser(() => new ValueToken);
+
+class ValueToken extends Token {
+	public override compiled = "&";
+	public override string = "&";
 }
