@@ -4,7 +4,7 @@ import type File from "vinyl";
 import Quilt, { IQuiltOptions } from "./Quilt";
 import Warp from "./Warp";
 
-const nodeMode = typeof TransformStream === "undefined";
+const nodeMode = typeof require !== "undefined";
 // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-var-requires,  @typescript-eslint/no-unsafe-assignment
 const ExtensionClass = (nodeMode ? require("stream").Transform : TransformStream) as new (transformer?: Transformer) => Transform & TransformStream;
 
