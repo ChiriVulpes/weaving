@@ -1,6 +1,6 @@
 # weaving
 [![GitHub issues](https://img.shields.io/github/issues/ChiriVulpes/weaving.svg?style=flat-square)](https://github.com/ChiriVulpes/weaving)
-[![GitHub build](https://img.shields.io/github/workflow/status/ChiriVulpes/weaving/CI.svg?style=flat-square)](https://github.com/ChiriVulpes/weaving/actions/workflows/main.yml)
+[![GitHub build](https://img.shields.io/github/actions/workflow/status/ChiriVulpes/weaving/main.yml?style=flat-square)](https://github.com/ChiriVulpes/weaving/actions/workflows/main.yml)
 
 A simplified syntax for i18n files that compiles down into efficient JavaScript with TypeScript definitions. ✨
 
