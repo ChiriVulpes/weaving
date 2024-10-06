@@ -24,13 +24,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         LENGTH: "let l=v=>!v?0:typeof v.length==\"number\"?v.length:typeof v.size==\"number\"?v.size:ii(v)?[...v].length:typeof v==\"object\"?Object.keys(v).length:0;",
     };
     const QUILT_HEADER = `
-export type StringResolvable = string | Weave;
+export type StringResolvable = string | Weft[];
 
 export interface Weft {
 	content: StringResolvable;
 }
 
-export type Weave = Weft[];
+export interface Weave {
+	content: Weft[];
+	toString(): string;
+}
 
 export interface Quilt {
 `;

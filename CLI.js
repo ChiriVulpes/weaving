@@ -134,11 +134,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     async function compileFile(file) {
         if (!file.endsWith(".quilt"))
             return;
+        const relativeFile = File.relative(file);
+        const basename = relativeFile.slice(0, -6);
+        const dts = path_1.default.resolve(process.cwd(), argv.outTypes ?? argv.out ?? "", `${basename}.d.ts`);
+        const js = path_1.default.resolve(process.cwd(), argv.out ?? "", `${basename}.js`);
+        await fs_1.default.promises.mkdir(path_1.default.dirname(js), { recursive: true });
+        await fs_1.default.promises.mkdir(path_1.default.dirname(dts), { recursive: true });
         return new Promise(resolve => {
-            const relativeFile = File.relative(file);
-            const basename = relativeFile.slice(0, -6);
-            const dts = path_1.default.resolve(process.cwd(), argv.outTypes ?? argv.out ?? "", `${basename}.d.ts`);
-            const js = path_1.default.resolve(process.cwd(), argv.out ?? "", `${basename}.js`);
             const quilt = Weaving_1.default.createQuiltTransformer();
             if (argv.types)
                 quilt.definitions.pipe(fs_1.default.createWriteStream(dts));
