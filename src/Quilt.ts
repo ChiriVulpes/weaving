@@ -13,13 +13,16 @@ const FUNCTIONS = {
 }
 
 const QUILT_HEADER = `
-export type StringResolvable = string | Weave;
+export type StringResolvable = string | Weft[];
 
 export interface Weft {
 	content: StringResolvable;
 }
 
-export type Weave = Weft[];
+export interface Weave {
+	content: Weft[];
+	toString(): string;
+}
 
 export interface Quilt {
 `
