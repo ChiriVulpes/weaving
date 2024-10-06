@@ -48,7 +48,7 @@
             return args.map(arg => index(arg.path) === presentIndex ? { ...arg, optional: true } : arg);
         }
         IArgument.filteredIndexPresent = filteredIndexPresent;
-    })(IArgument = exports.IArgument || (exports.IArgument = {}));
+    })(IArgument || (exports.IArgument = IArgument = {}));
     var IWeft;
     (function (IWeft) {
         function compile(weft) {
@@ -56,29 +56,27 @@
             return `{content:${content}${weft.details ? `,${JSON.stringify(weft.details)}` : ""}}`;
         }
         IWeft.compile = compile;
-    })(IWeft = exports.IWeft || (exports.IWeft = {}));
+    })(IWeft || (exports.IWeft = IWeft = {}));
     class Token {
-        constructor() {
-            this.args = [];
-            // public require (fn: string) {
-            // }
-        }
         static compile(...tokens) {
-            return tokens.map(token => { var _a; return (_a = token.compiled) !== null && _a !== void 0 ? _a : "\"\""; }).join(",");
+            return tokens.map(token => token.compiled ?? "\"\"").join(",");
         }
         static stringify(inner, ...tokens) {
             if (inner !== true)
                 tokens.unshift(inner), inner = false;
-            return `${inner ? "" : "`"}${tokens.map(token => { var _a; return (_a = token.string) !== null && _a !== void 0 ? _a : ""; }).join("")}${inner ? "" : "`"}`;
+            return `${inner ? "" : "`"}${tokens.map(token => token.string ?? "").join("")}${inner ? "" : "`"}`;
         }
         static rawGenerator(generator) {
             return `\${${generator}}`;
         }
+        compiled;
+        string;
         setCompiled(compiled, string) {
             this.compiled = typeof compiled === "string" ? compiled : IWeft.compile(compiled);
             this.string = string === undefined ? compiled : string;
             return this;
         }
+        args = [];
         addArgument(path, type, optional = false) {
             this.args.push({ path, type, optional });
             return this;
@@ -95,9 +93,7 @@
     }
     (function (Token) {
         class Text {
-            constructor() {
-                this.text = "";
-            }
+            text = "";
             get compiled() {
                 return `{content:${JSON.stringify(this.text)}}`;
             }

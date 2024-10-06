@@ -1,4 +1,4 @@
-import Warp from "./Warp";
+import type Warp from "./Warp";
 import Weave from "./Weave";
 export interface IQuiltOptions {
     /** Replace the default weaving function with an edited implementation. The default implementation resides in `Weave.compile` */

@@ -10,11 +10,11 @@
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const BASE_CODES = {
-        120: 16,
-        88: 16,
-        98: 2,
-        66: 2,
-        111: 8,
+        120: 16, /* x */
+        88: 16, /* X */
+        98: 2, /* b */
+        66: 2, /* B */
+        111: 8, /* o */
         79: 8, /* O */
     };
     function isWordChar(n) {
@@ -31,14 +31,14 @@
             || (n >= 97 && n < 97 + base); // a through z (less based on base)
     }
     class StringWalker {
-        constructor(str) {
-            this.str = str;
-            this.cursor = 0;
-            this.savedCursors = [];
-        }
+        str;
+        cursor = 0;
         get char() { return this.str[this.cursor]; }
         get nextChar() { return this.str[this.cursor + 1]; }
         get ended() { return this.cursor >= this.str.length; }
+        constructor(str) {
+            this.str = str;
+        }
         prev() {
             --this.cursor;
             return this.char;
@@ -60,7 +60,8 @@
             do {
                 if (char === substr[0] && this.isAtSubstr(substr))
                     break;
-            } while (char = this.next());
+                char = this.next();
+            } while (char);
             return this;
         }
         walkWhitespace() {
@@ -68,11 +69,11 @@
             do {
                 if (char !== " " && char !== "\t" && char !== "\r" && char !== "\n")
                     break;
-            } while (char = this.next());
+                char = this.next();
+            } while (char);
             return this;
         }
         walkArgument() {
-            var _a, _b;
             let argument = "";
             if (this.walkChar("&"))
                 argument += "&";
@@ -80,11 +81,12 @@
             do {
                 const n = char.charCodeAt(0);
                 const word = isWordChar(n)
-                    || (n === 46 && isWordChar((_b = (_a = this.nextChar) === null || _a === void 0 ? void 0 : _a.charCodeAt(0)) !== null && _b !== void 0 ? _b : 0)); // .
+                    || (n === 46 && isWordChar(this.nextChar?.charCodeAt(0) ?? 0)); // .
                 if (!word)
                     break;
                 argument += char;
-            } while (char = this.next());
+                char = this.next();
+            } while (char);
             if (this.walkWhitespace().walkSubstr(".."))
                 argument += "..";
             return argument || undefined;
@@ -96,29 +98,28 @@
             return this.walkNumber(canHaveBigInt, false);
         }
         walkNumber(canHaveBigInt, canHaveFloat = true, canHaveExponent = true) {
-            var _a, _b;
             const negative = this.walkChar("-");
             if (!negative)
                 this.walkChar("+");
             let char = this.char;
-            let code = char === null || char === void 0 ? void 0 : char.charCodeAt(0);
+            let code = char?.charCodeAt(0);
             let base = 10;
             let parseable = negative ? "-" : "";
             const canHaveBase = code === 48; /* 0 */
             if (canHaveBase) {
-                char = this.nextChar, code = char === null || char === void 0 ? void 0 : char.charCodeAt(0);
-                base = (_a = BASE_CODES[code]) !== null && _a !== void 0 ? _a : base;
+                char = this.nextChar, code = char?.charCodeAt(0);
+                base = BASE_CODES[code] ?? base;
                 if (base !== 10) {
                     canHaveFloat = false;
                     parseable += `0${char}`;
                     this.walk(2);
-                    char = this.char, code = char === null || char === void 0 ? void 0 : char.charCodeAt(0);
+                    char = this.char, code = char?.charCodeAt(0);
                 }
             }
             parseable += this.walkDigits(base, char, code);
             let isFloat = false;
             if (canHaveFloat && code === 46 /* . */) {
-                const nextCode = (_b = this.nextChar) === null || _b === void 0 ? void 0 : _b.charCodeAt(0);
+                const nextCode = this.nextChar?.charCodeAt(0);
                 if (nextCode && isDigit(nextCode, base)) {
                     isFloat = true;
                     this.next();
@@ -131,7 +132,7 @@
             if (!isFloat && canHaveBigInt && (code === 110 /* n */ || code === 78 /* N */)) {
                 bigint = true;
                 this.next();
-                char = this.next(), code = char === null || char === void 0 ? void 0 : char.charCodeAt(0);
+                char = this.next(), code = char?.charCodeAt(0);
             }
             let integer = bigint ? BigInt(parseable) : isFloat ? parseFloat(parseable) : parseInt(parseable, base);
             if (canHaveExponent && (code === 101 /* e */ || code === 69 /* E */)) {
@@ -151,16 +152,15 @@
             }
             return integer;
         }
-        walkDigits(base, char = this.char, code = char === null || char === void 0 ? void 0 : char.charCodeAt(0)) {
-            var _a;
+        walkDigits(base, char = this.char, code = char?.charCodeAt(0)) {
             let digits = "";
             let canUnderscore = false;
             let nextIsDigit;
             do {
-                const digit = code && (nextIsDigit !== null && nextIsDigit !== void 0 ? nextIsDigit : isDigit(code, base));
+                const digit = code && (nextIsDigit ?? isDigit(code, base));
                 if (!digit) {
                     if (canUnderscore && code === 95 /* _ */) {
-                        const nextCode = (_a = this.nextChar) === null || _a === void 0 ? void 0 : _a.charCodeAt(0);
+                        const nextCode = this.nextChar?.charCodeAt(0);
                         nextIsDigit = nextCode ? isDigit(nextCode, base) : undefined;
                         if (nextIsDigit) {
                             // consume the underscore
@@ -172,9 +172,10 @@
                 }
                 canUnderscore = true;
                 digits += char;
-            } while (char = this.next(), code = char === null || char === void 0 ? void 0 : char.charCodeAt(0));
+            } while (char = this.next(), code = char?.charCodeAt(0));
             return digits;
         }
+        savedCursors = [];
         save() {
             this.savedCursors.push(this.cursor);
             return this;
@@ -184,8 +185,7 @@
             return this;
         }
         restore() {
-            var _a;
-            this.cursor = (_a = this.savedCursors.pop()) !== null && _a !== void 0 ? _a : this.cursor;
+            this.cursor = this.savedCursors.pop() ?? this.cursor;
             return this;
         }
         hasNext(substr) {

@@ -18,15 +18,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const WarpConditional_1 = __importDefault(require("./warps/WarpConditional"));
     const WarpTag_1 = __importDefault(require("./warps/WarpTag"));
     class Weave {
-        constructor(raw, warps = Weave.DEFAULT_WARPS) {
-            this.raw = raw;
-            this.warps = warps;
-        }
+        raw;
+        warps;
         static compile(source, warps) {
             return Weave.compileTokens(...new Weave(source, warps).tokenise());
         }
         static compileTokens(...tokens) {
-            var _a, _b, _c;
             let compiled = "";
             const argTypes = [];
             let lastRequiredIndex = -1;
@@ -35,7 +32,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 if (!token.compiled)
                     continue;
                 compiled += `${token.compiled},`;
-                for (const { path, type, optional } of (_a = token.args) !== null && _a !== void 0 ? _a : []) {
+                for (const { path, type, optional } of token.args ?? []) {
                     const keys = path.split(".");
                     if (keys.length === 0)
                         continue;
@@ -43,11 +40,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         keys.unshift("0");
                     const generatedType = this.compileType(keys.slice(1), type);
                     const index = +keys[0];
-                    ((_b = argTypes[index]) !== null && _b !== void 0 ? _b : (argTypes[index] = new Set())).add(generatedType);
+                    (argTypes[index] ??= new Set()).add(generatedType);
                     if (!optional)
                         lastRequiredIndex = Math.max(index, lastRequiredIndex);
-                    (_c = optionals[index]) !== null && _c !== void 0 ? _c : (optionals[index] = true);
-                    optionals[index] && (optionals[index] = optional);
+                    optionals[index] ??= true;
+                    optionals[index] &&= optional;
                 }
             }
             compiled = compiled.slice(0, -1);
@@ -73,11 +70,20 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 result = `{ "${keys[i]}": ${result} }`;
             return result;
         }
+        static DEFAULT_WARPS = [
+            WarpTag_1.default,
+            WarpConditional_1.default,
+            WarpArgument_1.default,
+        ];
+        constructor(raw, warps = Weave.DEFAULT_WARPS) {
+            this.raw = raw;
+            this.warps = warps;
+        }
         tokenise(walker = new StringWalker_1.default(this.raw), until) {
             const tokens = [];
             let token;
             const warps = this.buildWarpCache();
-            until !== null && until !== void 0 ? until : (until = []);
+            until ??= [];
             let char = walker.char;
             NextChar: do {
                 if (until.some(substr => walker.hasNext(substr)))
@@ -95,11 +101,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 if (!(token instanceof Token_1.default.Text))
                     tokens.push(token = new Token_1.default.Text());
                 token.text += char;
+                // eslint-disable-next-line no-cond-assign
             } while (char = walker.next());
             return tokens;
         }
         tokeniseWarp(walker, warps) {
-            var _a;
             const matching = [];
             for (const warp of warps)
                 for (const match of arrayOr(warp.matches))
@@ -107,7 +113,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         if (walker.hasNext(start))
                             matching.push([warp, match, walker.clone().walk(start.length)]);
             for (const [warp, match, warpWalker] of matching) {
-                const warpTokens = (_a = warp.tokenise) === null || _a === void 0 ? void 0 : _a.call(warp, warpWalker, match, this);
+                const warpTokens = warp.tokenise?.(warpWalker, match, this);
                 if (!warpTokens)
                     continue;
                 if (!warpWalker.walkSubstr(...match.end) && !warpWalker.ended)
@@ -120,19 +126,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         with(warps) {
             return new Weave(this.raw, [...warps, ...this.warps]);
         }
+        warpCache;
         /**
          * @returns A Record mapping all warps to the first character of each of their starts
          */
         buildWarpCache() {
-            var _a;
-            var _b;
             if (this.warpCache)
                 return this.warpCache;
             const cache = {};
             for (const warp of this.warps) {
                 for (const match of arrayOr(warp.matches)) {
                     for (const start of match.start) {
-                        (_a = cache[_b = start[0]]) !== null && _a !== void 0 ? _a : (cache[_b] = new Set());
+                        cache[start[0]] ??= new Set();
                         cache[start[0]].add(warp);
                     }
                 }
@@ -141,11 +146,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         }
     }
     exports.default = Weave;
-    Weave.DEFAULT_WARPS = [
-        WarpTag_1.default,
-        WarpConditional_1.default,
-        WarpArgument_1.default,
-    ];
     function arrayOr(val) {
         return Array.isArray(val) ? val : [val];
     }

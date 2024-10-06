@@ -1,6 +1,7 @@
 import StringWalker from "./StringWalker";
-import { IToken } from "./Token";
-import Warp, { IWarpAPI } from "./Warp";
+import type { IToken } from "./Token";
+import type Warp from "./Warp";
+import type { IWarpAPI } from "./Warp";
 export default class Weave implements IWarpAPI {
     private readonly raw;
     private readonly warps;

@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.DEFAULT_WARPS = exports.stream = exports.createFileTransformer = exports.createQuiltTransformer = exports.QuiltTransformer = void 0;
+    exports.stream = exports.createQuiltTransformer = exports.createFileTransformer = exports.QuiltTransformer = exports.DEFAULT_WARPS = void 0;
     const QuiltTransformer_1 = __importDefault(require("./QuiltTransformer"));
     exports.QuiltTransformer = QuiltTransformer_1.default;
     const Weave_1 = __importDefault(require("./Weave"));

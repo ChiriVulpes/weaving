@@ -1,8 +1,7 @@
-/// <reference types="node" />
 import type { Readable, Transform, TransformCallback } from "stream";
-import { IQuiltOptions } from "./Quilt";
-import Warp from "./Warp";
-declare const ExtensionClass: new (transformer?: Transformer<any, any> | undefined) => Transform & TransformStream;
+import type { IQuiltOptions } from "./Quilt";
+import type Warp from "./Warp";
+declare const ExtensionClass: new (transformer?: Transformer) => Transform & TransformStream;
 export interface IQuiltFileTransformerOptions extends IQuiltOptions {
     /** @default true */
     types?: boolean;

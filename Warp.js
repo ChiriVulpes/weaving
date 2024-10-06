@@ -11,9 +11,7 @@
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.Match = void 0;
     class Warp {
-        constructor() {
-            this._matches = [];
-        }
+        _matches = [];
         get matches() {
             return this._matches.length === 0 ? Match.BASIC : this._matches;
         }
@@ -21,6 +19,7 @@
             this._matches.push(...matches);
             return this;
         }
+        tokenise;
         setTokeniser(tokeniser, ...args) {
             this.tokenise = (walker, match, api) => tokeniser(walker, match, api, ...args);
             return this;
@@ -28,14 +27,16 @@
     }
     exports.default = Warp;
     class Match {
+        static BASIC_START = "{";
+        static BASIC_END = "}";
+        static BASIC = new Match();
         constructor(start, end) {
-            this.start = [Match.BASIC_START];
-            this.end = [Match.BASIC_END];
             if (start !== undefined)
                 this.start[0] = start;
             if (end !== undefined)
                 this.end[0] = end;
         }
+        start = [Match.BASIC_START];
         setStart(...starts) {
             this.start = starts;
             return this;
@@ -44,6 +45,7 @@
             this.start.push(...starts);
             return this;
         }
+        end = [Match.BASIC_END];
         setEnd(...ends) {
             this.end = ends;
             return this;
@@ -59,7 +61,4 @@
         }
     }
     exports.Match = Match;
-    Match.BASIC_START = "{";
-    Match.BASIC_END = "}";
-    Match.BASIC = new Match();
 });

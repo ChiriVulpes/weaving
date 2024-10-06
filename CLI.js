@@ -21,17 +21,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const Quilt_1 = require("./Quilt");
     const Weaving_1 = __importDefault(require("./Weaving"));
     // #region fs/path
-    function promisify(fn, ...args) {
-        return new Promise((resolve, reject) => fn.call(null, ...args, (err, result) => err ? reject(err) : resolve(result)));
-    }
     var File;
     (function (File) {
         async function stat(file) {
-            return promisify(fs_1.default.stat, file).catch(() => null);
+            return fs_1.default.promises.stat(file).catch(() => null);
         }
         File.stat = stat;
         async function children(dir) {
-            return promisify(fs_1.default.readdir, dir)
+            return fs_1.default.promises.readdir(dir)
                 .then(files => files.map(file => path_1.default.resolve(dir, file)))
                 .catch(() => []);
         }
@@ -75,7 +72,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         return chalk[c2](text);
     }
     // #endregion
-    const argv = yargs_1.default(helpers_1.hideBin(process.argv))
+    const argv = (0, yargs_1.default)((0, helpers_1.hideBin)(process.argv))
         .alias("v", "version")
         .options({
         out: { type: "string", alias: "o", description: "A directory that compiled `.js` files will reside in. By default, files are compiled to the same directory as their respective `.quilt` files." },
@@ -138,11 +135,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (!file.endsWith(".quilt"))
             return;
         return new Promise(resolve => {
-            var _a, _b, _c;
             const relativeFile = File.relative(file);
             const basename = relativeFile.slice(0, -6);
-            const dts = path_1.default.resolve(process.cwd(), (_b = (_a = argv.outTypes) !== null && _a !== void 0 ? _a : argv.out) !== null && _b !== void 0 ? _b : "", `${basename}.d.ts`);
-            const js = path_1.default.resolve(process.cwd(), (_c = argv.out) !== null && _c !== void 0 ? _c : "", `${basename}.js`);
+            const dts = path_1.default.resolve(process.cwd(), argv.outTypes ?? argv.out ?? "", `${basename}.d.ts`);
+            const js = path_1.default.resolve(process.cwd(), argv.out ?? "", `${basename}.js`);
             const quilt = Weaving_1.default.createQuiltTransformer();
             if (argv.types)
                 quilt.definitions.pipe(fs_1.default.createWriteStream(dts));
@@ -151,9 +147,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 .pipe(quilt)
                 .pipe(fs_1.default.createWriteStream(js));
             quilt.on("error", (err) => {
-                var _a, _b;
                 let message;
-                const errorMessage = argv.verbose ? (_b = (_a = err.stack) === null || _a === void 0 ? void 0 : _a.slice(7).replace(/\n/g, "\n   ")) !== null && _b !== void 0 ? _b : "" : err.message;
+                const errorMessage = argv.verbose ? err.stack?.slice(7).replace(/\n/g, "\n   ") ?? "" : err.message;
                 if (err instanceof Quilt_1.QuiltError) {
                     const errorPosition = `${relativeFile}${err.line === undefined ? "" : `:${err.line}${err.column === undefined ? "" : `:${err.column}`}`}`;
                     message = `Compilation error at ${color(errorPosition, "red")}: ${errorMessage}`;

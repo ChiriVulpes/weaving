@@ -1,11 +1,11 @@
-import StringWalker from "./StringWalker";
-import { IToken } from "./Token";
+import type StringWalker from "./StringWalker";
+import type { IToken } from "./Token";
 export interface IWarpAPI {
     tokenise(walker: StringWalker, until?: string[]): IToken[];
     tokeniseWarp(walker: StringWalker, warps: Iterable<Warp>): IToken[] | undefined;
     with(warps: Warp[]): IWarpAPI;
 }
-export declare type Tokeniser<ARGS extends any[] = []> = (walker: StringWalker, match: Match, api: IWarpAPI, ...args: ARGS) => IToken | IToken[] | undefined;
+export type Tokeniser<ARGS extends any[] = []> = (walker: StringWalker, match: Match, api: IWarpAPI, ...args: ARGS) => IToken | IToken[] | undefined;
 export default class Warp {
     private readonly _matches;
     get matches(): Match | Match[];

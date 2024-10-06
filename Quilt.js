@@ -47,6 +47,8 @@ export default quilt;
         return path.flat().join("/");
     }
     class QuiltError extends Error {
+        line;
+        column;
         constructor(reason, line, column) {
             super(reason);
             this.line = line;
@@ -55,41 +57,44 @@ export default quilt;
     }
     exports.QuiltError = QuiltError;
     class Quilt {
+        options;
+        warps;
         constructor(options, warps) {
             this.options = options;
             this.warps = warps;
-            this.dictionaries = [];
-            this.mode = 0 /* CommentOrDictionaryOrEntry */;
-            this.pendingDictionary = "";
-            this.level = -1;
-            this.pendingEntry = "";
-            this.nextEscaped = false;
-            this.pendingTranslation = "";
-            this.pendingTranslationOrEntry = "";
-            this.line = 0;
-            this.column = 0;
         }
+        scriptConsumer;
         onScript(consumer) {
             this.scriptConsumer = consumer;
             return this;
         }
+        definitionsConsumer;
         onDefinitions(consumer) {
             this.definitionsConsumer = consumer;
             return this;
         }
+        errorConsumer;
         onError(consumer) {
             this.errorConsumer = consumer;
             return this;
         }
         start() {
-            var _a, _b;
-            (_a = this.scriptConsumer) === null || _a === void 0 ? void 0 : _a.call(this, `${UMD_HEADER}${Object.values(FUNCTIONS).join("")}exports.default={`);
-            (_b = this.definitionsConsumer) === null || _b === void 0 ? void 0 : _b.call(this, QUILT_HEADER);
+            this.scriptConsumer?.(`${UMD_HEADER}${Object.values(FUNCTIONS).join("")}exports.default={`);
+            this.definitionsConsumer?.(QUILT_HEADER);
             return this;
         }
+        dictionaries = [];
+        mode = 0 /* Mode.CommentOrDictionaryOrEntry */;
+        pendingDictionary = "";
+        level = -1;
+        pendingEntry = "";
+        nextEscaped = false;
+        pendingTranslation = "";
+        pendingTranslationOrEntry = "";
+        line = 0;
+        column = 0;
         error(reason) {
-            var _a;
-            (_a = this.errorConsumer) === null || _a === void 0 ? void 0 : _a.call(this, new QuiltError(reason, this.line, this.column));
+            this.errorConsumer?.(new QuiltError(reason, this.line, this.column));
         }
         transform(chunk) {
             let mode = this.mode;
@@ -106,14 +111,14 @@ export default quilt;
                 else
                     this.column++;
                 switch (mode) {
-                    case 0 /* CommentOrDictionaryOrEntry */:
-                        mode = char === "#" ? 2 /* DictionaryLevel */ : 1 /* CommentOrEntry */;
+                    case 0 /* Mode.CommentOrDictionaryOrEntry */:
+                        mode = char === "#" ? 2 /* Mode.DictionaryLevel */ : 1 /* Mode.CommentOrEntry */;
                         break;
-                    case 6 /* TranslationOrDictionaryOrEntry */:
+                    case 6 /* Mode.TranslationOrDictionaryOrEntry */:
                         if (char !== "#")
-                            mode = 5 /* TranslationOrEntry */;
+                            mode = 5 /* Mode.TranslationOrEntry */;
                         else {
-                            mode = 2 /* DictionaryLevel */;
+                            mode = 2 /* Mode.DictionaryLevel */;
                             this.pushEntry(pendingEntry, pendingTranslation);
                             pendingEntry = "";
                             pendingTranslation = "";
@@ -121,13 +126,13 @@ export default quilt;
                         break;
                 }
                 switch (mode) {
-                    case 2 /* DictionaryLevel */:
+                    case 2 /* Mode.DictionaryLevel */:
                         if (char === "#")
                             level++;
                         else
-                            mode = 3 /* Dictionary */;
+                            mode = 3 /* Mode.Dictionary */;
                         continue;
-                    case 3 /* Dictionary */:
+                    case 3 /* Mode.Dictionary */:
                         if (nextEscaped && char !== "\r") {
                             pendingDictionary += char;
                             nextEscaped = false;
@@ -139,7 +144,7 @@ export default quilt;
                                 continue;
                             case "\n":
                                 this.dictionaries.splice(level, Infinity, unpathify(pendingDictionary));
-                                mode = 0 /* CommentOrDictionaryOrEntry */;
+                                mode = 0 /* Mode.CommentOrDictionaryOrEntry */;
                                 pendingDictionary = "";
                                 level = -1;
                                 continue;
@@ -147,12 +152,12 @@ export default quilt;
                                 nextEscaped = true;
                                 continue;
                             default:
-                                mode = 3 /* Dictionary */;
+                                mode = 3 /* Mode.Dictionary */;
                                 if (char !== "\r")
                                     pendingDictionary += char;
                                 continue;
                         }
-                    case 1 /* CommentOrEntry */:
+                    case 1 /* Mode.CommentOrEntry */:
                         if (nextEscaped && char !== "\r") {
                             pendingEntry += char;
                             nextEscaped = false;
@@ -160,21 +165,21 @@ export default quilt;
                         }
                         switch (char) {
                             case "\n":
-                                mode = 0 /* CommentOrDictionaryOrEntry */;
+                                mode = 0 /* Mode.CommentOrDictionaryOrEntry */;
                                 pendingEntry = "";
                                 continue;
                             case "\\":
                                 nextEscaped = true;
                                 continue;
                             case ":":
-                                mode = 4 /* Translation */;
+                                mode = 4 /* Mode.Translation */;
                                 continue;
                             default:
                                 if (char !== "\r")
                                     pendingEntry += char;
                                 continue;
                         }
-                    case 5 /* TranslationOrEntry */:
+                    case 5 /* Mode.TranslationOrEntry */:
                         if (nextEscaped && char !== "\r") {
                             pendingTranslationOrEntry += char;
                             nextEscaped = false;
@@ -183,7 +188,7 @@ export default quilt;
                         switch (char) {
                             case "\n":
                                 pendingTranslation += pendingTranslationOrEntry + "\n";
-                                mode = 6 /* TranslationOrDictionaryOrEntry */;
+                                mode = 6 /* Mode.TranslationOrDictionaryOrEntry */;
                                 continue;
                             case "\\":
                                 nextEscaped = true;
@@ -193,14 +198,14 @@ export default quilt;
                                 pendingEntry = pendingTranslationOrEntry;
                                 pendingTranslationOrEntry = "";
                                 pendingTranslation = "";
-                                mode = 4 /* Translation */;
+                                mode = 4 /* Mode.Translation */;
                                 continue;
                             default:
                                 if (char !== "\r")
                                     pendingTranslationOrEntry += char;
                                 continue;
                         }
-                    case 4 /* Translation */:
+                    case 4 /* Mode.Translation */:
                         if (nextEscaped && char !== "\r") {
                             pendingTranslation += char;
                             nextEscaped = false;
@@ -208,7 +213,7 @@ export default quilt;
                         }
                         switch (char) {
                             case "\n":
-                                mode = 6 /* TranslationOrDictionaryOrEntry */;
+                                mode = 6 /* Mode.TranslationOrDictionaryOrEntry */;
                                 continue;
                             case "\\":
                                 nextEscaped = true;
@@ -230,27 +235,25 @@ export default quilt;
             return this;
         }
         complete() {
-            var _a, _b;
             switch (this.mode) {
-                case 4 /* Translation */:
-                case 5 /* TranslationOrEntry */:
-                case 6 /* TranslationOrDictionaryOrEntry */:
+                case 4 /* Mode.Translation */:
+                case 5 /* Mode.TranslationOrEntry */:
+                case 6 /* Mode.TranslationOrDictionaryOrEntry */:
                     this.pushEntry();
                     break;
             }
-            (_a = this.scriptConsumer) === null || _a === void 0 ? void 0 : _a.call(this, `}${UMD_FOOTER}`);
-            (_b = this.definitionsConsumer) === null || _b === void 0 ? void 0 : _b.call(this, QUILT_FOOTER);
+            this.scriptConsumer?.(`}${UMD_FOOTER}`);
+            this.definitionsConsumer?.(QUILT_FOOTER);
             return this;
         }
         pushEntry(pendingEntry = this.pendingEntry, pendingTranslation = this.pendingTranslation) {
-            var _a, _b, _c, _d;
             const entry = pathify(...this.dictionaries, unpathify(pendingEntry));
             if (pendingTranslation[0] === " ")
                 pendingTranslation = pendingTranslation.trim();
-            const compile = (_b = (_a = this.options) === null || _a === void 0 ? void 0 : _a.weave) !== null && _b !== void 0 ? _b : Weave_1.default.compile;
+            const compile = this.options?.weave ?? Weave_1.default.compile;
             const translation = compile(pendingTranslation, this.warps);
-            (_c = this.scriptConsumer) === null || _c === void 0 ? void 0 : _c.call(this, `"${entry}":${translation.script},`);
-            (_d = this.definitionsConsumer) === null || _d === void 0 ? void 0 : _d.call(this, `\t"${entry}"${translation.definitions};\n`);
+            this.scriptConsumer?.(`"${entry}":${translation.script},`);
+            this.definitionsConsumer?.(`\t"${entry}"${translation.definitions};\n`);
         }
     }
     exports.default = Quilt;

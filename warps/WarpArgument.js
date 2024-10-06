@@ -1,6 +1,10 @@
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -28,16 +32,15 @@ var __importStar = (this && this.__importStar) || function (mod) {
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.tokeniseArgument = void 0;
+    exports.tokeniseArgument = tokeniseArgument;
     const Token_1 = __importStar(require("../Token"));
     const Warp_1 = __importStar(require("../Warp"));
     // basic warp matching anything inside {}
     exports.default = new Warp_1.default()
         .setTokeniser(tokeniseArgument);
     function tokeniseArgument(walker, match, api, valueMode = false) {
-        var _a;
         walker.walkWhitespace();
-        const argument = (_a = walker.walkArgument()) !== null && _a !== void 0 ? _a : "";
+        const argument = walker.walkArgument() ?? "";
         if (argument)
             walker.walkWhitespace();
         const join = walker.walkChar("*");
@@ -53,22 +56,18 @@ var __importStar = (this && this.__importStar) || function (mod) {
             }
             const entry = !entryTokens ? ""
                 : `,v=>c([${entryTokens.map(token => token instanceof ValueToken ? "{content:v}" : token.compiled).join(",")}])`;
-            accessor = `j(${accessor},\`${separatorTokens.map(token => { var _a; return (_a = token.string) !== null && _a !== void 0 ? _a : ""; }).join("")}\`${entry})`;
+            accessor = `j(${accessor},\`${separatorTokens.map(token => token.string ?? "").join("")}\`${entry})`;
         }
         return new Token_1.default()
             .addArgument(argument, "any")
             .setCompiled({ content: accessor }, Token_1.default.rawGenerator(accessor));
     }
-    exports.tokeniseArgument = tokeniseArgument;
     // internal warp for matching & inside a join warp
     const WarpValue = new Warp_1.default()
         .match(new Warp_1.Match().setStart("&").setEnd(""))
         .setTokeniser(() => new ValueToken);
     class ValueToken extends Token_1.default {
-        constructor() {
-            super(...arguments);
-            this.compiled = "&";
-            this.string = "&";
-        }
+        compiled = "&";
+        string = "&";
     }
 });
