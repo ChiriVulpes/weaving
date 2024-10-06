@@ -12,42 +12,44 @@
 		"url": "https://github.com/ChiriVulpes/weaving"
 	},
 	"scripts": {
-		"build": "npx gulp compile-test",
-		"watch": "npx gulp watch",
-		"pub": "npx gulp publish"
+		"build": "npx ts-node tasks/utilities/TaskRunner.ts clean meta build",
+		"test": "npx ts-node tasks/utilities/TaskRunner.ts test",
+		"watch": "npx ts-node tasks/utilities/TaskRunner.ts clean meta watch",
+		"clean": "npx ts-node tasks/utilities/TaskRunner.ts clean"
 	},
 	"dependencies": {
 		"yargs": "17.7.2",
-		"chokidar": "3.5.3"
+		"chokidar": "3.6.0"
 	},
 	"devDependencies": {
-		"@types/yargs": "17.0.10",
-		"@types/chai": "4.2.16",
-		"@types/chai-as-promised": "7.1.3",
+		"@types/yargs": "17.0.33",
 		"@types/del": "4.0.0",
-		"@types/eslint": "7.2.6",
-		"@types/gulp": "4.0.8",
-		"@types/gulp-mocha": "0.0.33",
-		"@types/gulp-replace": "0.0.31",
-		"@types/mocha": "8.2.2",
-		"@types/node": "^12.7.3",
-		"@typescript-eslint/eslint-plugin": "4.15.2",
-		"@typescript-eslint/parser": "4.15.2",
-		"@types/vinyl": "2.0.6",
-		"chai": "4.3.4",
-		"chai-as-promised": "7.1.1",
+		"@types/node": "^22.7.4",
+		"@types/vinyl": "2.0.12",
+		"mocha": "10.7.3",
+		"chai": "4.5.0",
+		"chai-as-promised": "7.1.2",
+		"@types/chai": "4.3.17",
+		"@types/mocha": "10.0.7",
+		"@types/chai-as-promised": "7.1.8",
 		"chalk": "4.1.0",
-		"eslint": "7.20.0",
-		"eslint-plugin-only-warn": "1.0.2",
 		"even-more-min": "1.0.1",
-		"gulp": "4.0.2",
-		"gulp-mocha": "8.0.0",
-		"gulp-plumber": "1.2.1",
-		"gulp-replace": "1.1.2",
-		"merge2": "1.4.1",
-		"mocha": "8.3.2",
-		"ts-node": "9.1.1",
-		"typescript": "4.3.2",
-		"ansicolor": "1.1.100"
+		"ts-node": "10.9.2",
+		"typescript": "5.6.2",
+		"ansicolor": "1.1.100",
+		"eslint": "8.52.0",
+		"@types/eslint": "8.44.6",
+		"@typescript-eslint/eslint-plugin": "6.9.0",
+		"@typescript-eslint/parser": "6.9.0",
+		"eslint-plugin-only-warn": "1.0.3",
+		"del": "6.1.1"
+	},
+	"overrides": {
+		"ts-node": {
+			"typescript": "$typescript"
+		},
+		"even-more-min": {
+			"mocha": "$mocha"
+		}
 	}
 }

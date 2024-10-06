@@ -1,25 +1,13 @@
 {
-    "compilerOptions": {
-        "target": "esnext",
-        "module": "commonjs",
-        "moduleResolution": "node",
-        "esModuleInterop": true,
-        "experimentalDecorators": true,
-        "plugins": [
-            {
-                "name": "typescript-tslint-plugin"
-            }
-        ],
-        "strict": true,
-        "forceConsistentCasingInFileNames": true,
-        "noImplicitReturns": true,
-        "noUnusedLocals": true,
-        "noUnusedParameters": false,
-        "strictPropertyInitialization": false,
-        "allowSyntheticDefaultImports": true
-    },
-    "include": [
-        "gulpfile.ts",
-        "gulp/**/*.ts"
-    ]
+	"compilerOptions": {
+		"strict": true,
+		"esModuleInterop": true,
+		"allowJs": true,
+		"noEmit": true,
+		"target": "ES2020",
+		"moduleResolution": "node",
+		"resolveJsonModule": true,
+		"experimentalDecorators": true,
+		"noImplicitOverride": true
+	}
 }

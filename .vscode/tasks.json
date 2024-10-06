@@ -3,25 +3,9 @@
 	"tasks": [
 		{
 			"label": "watch",
-			"group": {
-				"kind": "build",
-				"isDefault": true
-			},
-			"type": "shell",
-			"command": "npx gulp watch",
-			"problemMatcher": []
-		},
-		{
-			"label": "build",
-			"type": "shell",
 			"group": "build",
-			"command": "npx gulp compile-test",
-			"problemMatcher": []
-		},
-		{
-			"label": "publish",
 			"type": "shell",
-			"command": "npx gulp publish",
+			"command": "npm run watch",
 			"problemMatcher": []
 		}
 	]

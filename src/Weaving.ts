@@ -1,5 +1,5 @@
-import * as Weaving from "./Lib";
+import * as Weaving from "./Lib"
 
-export * from "./Lib";
+export * from "./Lib"
 
-export default Weaving;
+export default Weaving

@@ -1,18 +1,18 @@
 {
     "compilerOptions": {
         "declaration": true,
-        "target": "ES2019",
+        "target": "esnext",
         "module": "UMD",
-        "moduleResolution": "node",
+        "outDir": "../build",
         "esModuleInterop": true,
         "experimentalDecorators": true,
         "strict": true,
         "forceConsistentCasingInFileNames": true,
+        "moduleResolution": "node",
         "noImplicitReturns": true,
         "noUnusedLocals": true,
         "noUnusedParameters": false,
-        "strictPropertyInitialization": false,
-        "noImplicitOverride": true
+        "strictPropertyInitialization": false
     },
     "include": [
         "**/*.ts"
