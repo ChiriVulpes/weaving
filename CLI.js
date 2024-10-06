@@ -35,7 +35,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         File.children = children;
         function relative(file) {
             file = path_1.default.relative(process.cwd(), file);
-            return file.startsWith(".") ? file : `.\\${file}`;
+            return file.startsWith(".") ? file : `.${path_1.default.sep}${file}`;
         }
         File.relative = relative;
     })(File || (File = {}));
