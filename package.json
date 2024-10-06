@@ -1,7 +1,7 @@
 {
 	"private": true,
 	"name": "weaving",
-	"version": "2.0.2",
+	"version": "2.0.3",
 	"description": "A ridiculously powerful and easy-to-use language system. 🚀",
 	"license": "MIT",
 	"main": "Weaving.js",
