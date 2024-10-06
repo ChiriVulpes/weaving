@@ -139,13 +139,16 @@ async function compileFile (file: string) {
 	if (!file.endsWith(".quilt"))
 		return
 
+	const relativeFile = File.relative(file)
+
+	const basename = relativeFile.slice(0, -6)
+	const dts = path.resolve(process.cwd(), argv.outTypes ?? argv.out ?? "", `${basename}.d.ts`)
+	const js = path.resolve(process.cwd(), argv.out ?? "", `${basename}.js`)
+
+	await fs.promises.mkdir(path.dirname(js), { recursive: true })
+	await fs.promises.mkdir(path.dirname(dts), { recursive: true })
+
 	return new Promise<void>(resolve => {
-		const relativeFile = File.relative(file)
-
-		const basename = relativeFile.slice(0, -6)
-		const dts = path.resolve(process.cwd(), argv.outTypes ?? argv.out ?? "", `${basename}.d.ts`)
-		const js = path.resolve(process.cwd(), argv.out ?? "", `${basename}.js`)
-
 		const quilt = Weaving.createQuiltTransformer()
 		if (argv.types)
 			quilt.definitions.pipe(fs.createWriteStream(dts))
