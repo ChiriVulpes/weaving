@@ -13,13 +13,5 @@
 	"dependencies": {
 		"yargs": "17.7.2",
 		"chokidar": "3.6.0"
-	},
-	"overrides": {
-		"ts-node": {
-			"typescript": "$typescript"
-		},
-		"even-more-min": {
-			"mocha": "$mocha"
-		}
 	}
 }
