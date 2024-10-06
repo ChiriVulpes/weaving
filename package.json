@@ -1,11 +1,13 @@
 {
 	"private": true,
 	"name": "weaving",
-	"version": "2.0.1",
+	"version": "2.0.2",
 	"description": "A ridiculously powerful and easy-to-use language system. 🚀",
 	"license": "MIT",
 	"main": "Weaving.js",
-	"bin": "CLI.js",
+	"bin": {
+		"weaving": "CLI.js"
+	},
 	"types": "./Weaving.d.ts",
 	"repository": {
 		"type": "git",
