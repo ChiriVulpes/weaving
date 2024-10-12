@@ -1,47 +1,49 @@
-import StringWalker from "../StringWalker";
-import Token, { IArgument, IToken } from "../Token";
-import Warp, { IWarpAPI, Match } from "../Warp";
+import type StringWalker from "../StringWalker"
+import type { IToken } from "../Token"
+import Token, { IArgument } from "../Token"
+import type { IWarpAPI } from "../Warp"
+import Warp, { Match } from "../Warp"
 
 // basic warp matching anything inside {}
 export default new Warp()
-	.setTokeniser(tokeniseArgument);
+	.setTokeniser(tokeniseArgument)
 
 export function tokeniseArgument (walker: StringWalker, match: Match, api: IWarpAPI, valueMode = false) {
-	walker.walkWhitespace();
-	const argument = walker.walkArgument() ?? "";
+	walker.walkWhitespace()
+	const argument = walker.walkArgument() ?? ""
 	if (argument)
-		walker.walkWhitespace();
+		walker.walkWhitespace()
 
-	const join = walker.walkChar("*");
+	const join = walker.walkChar("*")
 	if (!argument && !join && !valueMode)
-		return undefined;
+		return undefined
 
-	let accessor = IArgument.accessor(argument);
+	let accessor = IArgument.accessor(argument)
 	if (join) {
-		let entryTokens: IToken[] | undefined;
-		let separatorTokens = api.with([WarpValue]).tokenise(walker, [...match.end, ":"]);
+		let entryTokens: IToken[] | undefined
+		let separatorTokens = api.with([WarpValue]).tokenise(walker, [...match.end, ":"])
 		if (walker.walkChar(":")) {
-			entryTokens = separatorTokens;
-			separatorTokens = api.tokenise(walker, match.end);
+			entryTokens = separatorTokens
+			separatorTokens = api.tokenise(walker, match.end)
 		}
 
 		const entry = !entryTokens ? ""
 			: `,v=>c([${entryTokens.map(token => token instanceof ValueToken ? "{content:v}" : token.compiled).join(",")}])`
 
-		accessor = `j(${accessor},\`${separatorTokens.map(token => token.string ?? "").join("")}\`${entry})`;
+		accessor = `j(${accessor},\`${separatorTokens.map(token => token.string ?? "").join("")}\`${entry})`
 	}
 
 	return new Token()
 		.addArgument(argument, "any")
-		.setCompiled({ content: accessor }, Token.rawGenerator(accessor));
+		.setCompiled({ content: accessor }, Token.rawGenerator(accessor))
 }
 
 // internal warp for matching & inside a join warp
 const WarpValue = new Warp()
 	.match(new Match().setStart("&").setEnd(""))
-	.setTokeniser(() => new ValueToken);
+	.setTokeniser(() => new ValueToken)
 
 class ValueToken extends Token {
-	public override compiled = "&";
-	public override string = "&";
+	public override compiled = "&"
+	public override string = "&"
 }

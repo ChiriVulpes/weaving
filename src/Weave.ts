@@ -3,13 +3,10 @@ import type { IToken } from "./Token"
 import Token from "./Token"
 import type Warp from "./Warp"
 import type { IWarpAPI, Match } from "./Warp"
-import WarpArgument from "./warps/WarpArgument"
-import WarpConditional from "./warps/WarpConditional"
-import WarpTag from "./warps/WarpTag"
 
 export default class Weave implements IWarpAPI {
 
-	public static compile (source: string, warps?: Warp[]) {
+	public static compile (source: string, warps: Warp[]) {
 		return Weave.compileTokens(...new Weave(source, warps).tokenise())
 	}
 
@@ -74,13 +71,7 @@ export default class Weave implements IWarpAPI {
 		return result
 	}
 
-	public static DEFAULT_WARPS: Warp[] = [
-		WarpTag,
-		WarpConditional,
-		WarpArgument,
-	]
-
-	public constructor (private readonly raw: string, private readonly warps = Weave.DEFAULT_WARPS) {
+	public constructor (private readonly raw: string, private readonly warps: Warp[]) {
 	}
 
 	public tokenise (walker = new StringWalker(this.raw), until?: string[]) {

@@ -26,6 +26,12 @@ export default class Warp {
 		this.tokenise = (walker, match, api) => tokeniser(walker, match, api, ...args)
 		return this
 	}
+
+	private readonly _weftProperties: [property: string, type: string][] = []
+	public addWeftProperty (property: string, type: string) {
+		this._weftProperties.push([property, type])
+		return this
+	}
 }
 
 export class Match {

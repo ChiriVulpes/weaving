@@ -1,4 +1,7 @@
 import type Warp from "./Warp"
+import WarpArgument from "./warps/WarpArgument"
+import WarpConditional from "./warps/WarpConditional"
+import WarpTag from "./warps/WarpTag"
 import Weave from "./Weave"
 
 const UMD_HEADER = "(function(factory){if(typeof module===\"object\"&&typeof module.exports===\"object\"){var v=factory(require, exports);if(v!==undefined)module.exports=v}else if(typeof define===\"function\"&&define.amd){define([\"require\",\"exports\"],factory);}})(function(require,exports){\"use strict\";Object.defineProperty(exports,\"__esModule\",{value:true});"
@@ -12,17 +15,18 @@ const FUNCTIONS = {
 	LENGTH: "let l=v=>!v?0:typeof v.length==\"number\"?v.length:typeof v.size==\"number\"?v.size:ii(v)?[...v].length:typeof v==\"object\"?Object.keys(v).length:0;",
 }
 
-const QUILT_HEADER = `
-export type StringResolvable = string | Weft[];
-
-export interface Weft {
-	content: StringResolvable;
-}
-
+const QUILT_HEADER_PRE_WEFT = `
 export interface Weave {
 	content: Weft[];
 	toString(): string;
 }
+
+export interface Weft {
+	content: StringResolvable;
+`
+const QUILT_HEADER_POST_WEFT = `}
+	
+export type StringResolvable = string | Weft[];
 
 export interface Quilt {
 `
@@ -30,6 +34,12 @@ export interface Quilt {
 const QUILT_FOOTER = `}
 
 declare const quilt: Quilt;
+
+export namespace Quilt {
+	export type Key = keyof Quilt
+	export type SimpleKey = keyof { [KEY in keyof Quilt as Parameters<Quilt[KEY]>["length"] extends 0 ? KEY : never]: true }
+	export type Handler = (quilt: Quilt) => Weave
+}
 
 export default quilt;
 `
@@ -65,7 +75,13 @@ export class QuiltError extends Error {
 
 export default class Quilt {
 
-	public constructor (private readonly options?: IQuiltOptions, private readonly warps?: Warp[]) {
+	public static DEFAULT_WARPS: Warp[] = [
+		WarpTag,
+		WarpConditional,
+		WarpArgument,
+	]
+
+	public constructor (private readonly options?: IQuiltOptions, private readonly warps = Quilt.DEFAULT_WARPS) {
 	}
 
 	private scriptConsumer?: (chunk: string) => any
@@ -88,7 +104,11 @@ export default class Quilt {
 
 	public start () {
 		this.scriptConsumer?.(`${UMD_HEADER}${Object.values(FUNCTIONS).join("")}exports.default={`)
-		this.definitionsConsumer?.(QUILT_HEADER)
+		this.definitionsConsumer?.(QUILT_HEADER_PRE_WEFT)
+		for (const warp of this.warps ?? [])
+			for (const [property, type] of warp["_weftProperties"])
+				this.definitionsConsumer?.(`\t${property}?: ${type};\n`)
+		this.definitionsConsumer?.(QUILT_HEADER_POST_WEFT)
 		return this
 	}
 
