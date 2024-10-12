@@ -24,6 +24,11 @@
             this.tokenise = (walker, match, api) => tokeniser(walker, match, api, ...args);
             return this;
         }
+        _weftProperties = [];
+        addWeftProperty(property, type) {
+            this._weftProperties.push([property, type]);
+            return this;
+        }
     }
     exports.default = Warp;
     class Match {

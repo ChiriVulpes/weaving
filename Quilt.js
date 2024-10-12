@@ -7,12 +7,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "./Weave"], factory);
+        define(["require", "exports", "./warps/WarpArgument", "./warps/WarpConditional", "./warps/WarpTag", "./Weave"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.QuiltError = void 0;
+    const WarpArgument_1 = __importDefault(require("./warps/WarpArgument"));
+    const WarpConditional_1 = __importDefault(require("./warps/WarpConditional"));
+    const WarpTag_1 = __importDefault(require("./warps/WarpTag"));
     const Weave_1 = __importDefault(require("./Weave"));
     const UMD_HEADER = "(function(factory){if(typeof module===\"object\"&&typeof module.exports===\"object\"){var v=factory(require, exports);if(v!==undefined)module.exports=v}else if(typeof define===\"function\"&&define.amd){define([\"require\",\"exports\"],factory);}})(function(require,exports){\"use strict\";Object.defineProperty(exports,\"__esModule\",{value:true});";
     const UMD_FOOTER = "})";
@@ -23,23 +26,30 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         JOIN: "let j=(a,s,v)=>{a=(!a?[]:Array.isArray(a)?a:ii(a)?[...a]:[a]);a=v?a.map(v):a;return a.join(s)};",
         LENGTH: "let l=v=>!v?0:typeof v.length==\"number\"?v.length:typeof v.size==\"number\"?v.size:ii(v)?[...v].length:typeof v==\"object\"?Object.keys(v).length:0;",
     };
-    const QUILT_HEADER = `
-export type StringResolvable = string | Weft[];
-
-export interface Weft {
-	content: StringResolvable;
-}
-
+    const QUILT_HEADER_PRE_WEFT = `
 export interface Weave {
 	content: Weft[];
 	toString(): string;
 }
+
+export interface Weft {
+	content: StringResolvable;
+`;
+    const QUILT_HEADER_POST_WEFT = `}
+	
+export type StringResolvable = string | Weft[];
 
 export interface Quilt {
 `;
     const QUILT_FOOTER = `}
 
 declare const quilt: Quilt;
+
+export namespace Quilt {
+	export type Key = keyof Quilt
+	export type SimpleKey = keyof { [KEY in keyof Quilt as Parameters<Quilt[KEY]>["length"] extends 0 ? KEY : never]: true }
+	export type Handler = (quilt: Quilt) => Weave
+}
 
 export default quilt;
 `;
@@ -62,7 +72,12 @@ export default quilt;
     class Quilt {
         options;
         warps;
-        constructor(options, warps) {
+        static DEFAULT_WARPS = [
+            WarpTag_1.default,
+            WarpConditional_1.default,
+            WarpArgument_1.default,
+        ];
+        constructor(options, warps = Quilt.DEFAULT_WARPS) {
             this.options = options;
             this.warps = warps;
         }
@@ -83,7 +98,11 @@ export default quilt;
         }
         start() {
             this.scriptConsumer?.(`${UMD_HEADER}${Object.values(FUNCTIONS).join("")}exports.default={`);
-            this.definitionsConsumer?.(QUILT_HEADER);
+            this.definitionsConsumer?.(QUILT_HEADER_PRE_WEFT);
+            for (const warp of this.warps ?? [])
+                for (const [property, type] of warp["_weftProperties"])
+                    this.definitionsConsumer?.(`\t${property}?: ${type};\n`);
+            this.definitionsConsumer?.(QUILT_HEADER_POST_WEFT);
             return this;
         }
         dictionaries = [];

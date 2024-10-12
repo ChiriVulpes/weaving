@@ -7,16 +7,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "./StringWalker", "./Token", "./warps/WarpArgument", "./warps/WarpConditional", "./warps/WarpTag"], factory);
+        define(["require", "exports", "./StringWalker", "./Token"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const StringWalker_1 = __importDefault(require("./StringWalker"));
     const Token_1 = __importDefault(require("./Token"));
-    const WarpArgument_1 = __importDefault(require("./warps/WarpArgument"));
-    const WarpConditional_1 = __importDefault(require("./warps/WarpConditional"));
-    const WarpTag_1 = __importDefault(require("./warps/WarpTag"));
     class Weave {
         raw;
         warps;
@@ -70,12 +67,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 result = `{ "${keys[i]}": ${result} }`;
             return result;
         }
-        static DEFAULT_WARPS = [
-            WarpTag_1.default,
-            WarpConditional_1.default,
-            WarpArgument_1.default,
-        ];
-        constructor(raw, warps = Weave.DEFAULT_WARPS) {
+        constructor(raw, warps) {
             this.raw = raw;
             this.warps = warps;
         }

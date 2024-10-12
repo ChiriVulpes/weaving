@@ -52,6 +52,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         return new Token_1.default()
             .inheritArguments(...tag, ...content)
             // TODO optimise output here by compressing a single token into this object
-            .setCompiled(`{content:[${Token_1.default.compile(...content)}],details:{tag:${Token_1.default.stringify(...tag)}}}`, Token_1.default.stringify(true, ...content));
-    });
+            .setCompiled(`{content:[${Token_1.default.compile(...content)}],tag:${Token_1.default.stringify(...tag)}}`, Token_1.default.stringify(true, ...content));
+    })
+        .addWeftProperty("tag", "string");
 });

@@ -12,6 +12,8 @@ export default class Warp {
     match(...matches: Match[]): this;
     tokenise?: Tokeniser<[]>;
     setTokeniser<ARGS extends any[]>(tokeniser: Tokeniser<ARGS>, ...args: ARGS): this;
+    private readonly _weftProperties;
+    addWeftProperty(property: string, type: string): this;
 }
 export declare class Match {
     static BASIC_START: string;

@@ -11,8 +11,9 @@ export declare class QuiltError extends Error {
 }
 export default class Quilt {
     private readonly options?;
-    private readonly warps?;
-    constructor(options?: IQuiltOptions | undefined, warps?: Warp[] | undefined);
+    private readonly warps;
+    static DEFAULT_WARPS: Warp[];
+    constructor(options?: IQuiltOptions | undefined, warps?: Warp[]);
     private scriptConsumer?;
     onScript(consumer: (chunk: string) => any): this;
     private definitionsConsumer?;
