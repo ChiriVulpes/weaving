@@ -1,61 +1,65 @@
-import Token, { IArgument } from "../Token";
-import Warp from "../Warp";
+import Token, { IArgument } from "../Token"
+import Warp from "../Warp"
 
 export default new Warp()
 	.setTokeniser((walker, match, api) => {
-		walker.walkWhitespace();
+		walker.save()
+		walker.walkWhitespace()
 
-		let argument: string | undefined;
-		let checkExpression: string | undefined;
+		let argument: string | undefined
+		let checkExpression: string | undefined
 
-		walker.save();
 		ArgumentMode: {
-			let inverted = false;
+			let inverted = false
 			if (walker.walkSubstr("!")) {
-				inverted = true;
-				walker.walkWhitespace();
+				inverted = true
+				walker.walkWhitespace()
 			}
 
-			argument = walker.walkArgument();
+			argument = walker.walkArgument()
 			if (!argument)
-				break ArgumentMode;
+				break ArgumentMode
 
-			walker.walkWhitespace();
+			walker.walkWhitespace()
 			if (!walker.walkSubstr("?")) {
-				argument = undefined;
-				break ArgumentMode;
+				argument = undefined
+				break ArgumentMode
 			}
 
-			checkExpression = `${inverted ? "!" : ""}${IArgument.accessor(argument)}`;
+			if (walker.walkSubstr("?")) {
+				// handled by argument warp
+				walker.restore()
+				return undefined
+			}
+
+			checkExpression = `${inverted ? "!" : ""}${IArgument.accessor(argument)}`
 		}
 
-		if (argument) walker.unsave();
+		if (argument) walker.unsave()
 		else {
-			walker.restore();
-			return undefined;
+			walker.restore()
+			return undefined
 
-			// not single-argument mode
-			walker.restore();
 			// const 
 		}
 
-		const ifTrue = api.tokenise(walker, [":", ...match.end]);
-		walker.walkSubstr(":");
-		const ifFalse = api.tokenise(walker, match.end);
+		const ifTrue = api.tokenise(walker, [":", ...match.end])
+		walker.walkSubstr(":")
+		const ifFalse = api.tokenise(walker, match.end)
 
 		const token = new Token()
 			.inheritArguments(...ifFalse)
 			.setCompiled(`...${checkExpression}?[${Token.compile(...ifTrue)}]:[${Token.compile(...ifFalse)}]`,
-				Token.rawGenerator(`${checkExpression}?\`${Token.stringify(true, ...ifTrue)}\`:\`${Token.stringify(true, ...ifFalse)}\``));
+				Token.rawGenerator(`${checkExpression}?\`${Token.stringify(true, ...ifTrue)}\`:\`${Token.stringify(true, ...ifFalse)}\``))
 
 		if (argument)
 			token.addArgument(argument, "any", true)
-				.inheritArguments(IArgument.index(argument), ...ifTrue);
+				.inheritArguments(IArgument.index(argument), ...ifTrue)
 		else
-			token.inheritArguments(...ifTrue);
+			token.inheritArguments(...ifTrue)
 
-		return token;
-	});
+		return token
+	})
 
 // const
 

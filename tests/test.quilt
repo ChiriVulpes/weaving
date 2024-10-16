@@ -27,3 +27,7 @@ thing3: {#{GOOD?GOOD:TERRIBLE}:amaaaazing!{NEAT}
 people: {PEOPLE*{&FIRST} "{&NICK}" {&LAST} {&CHILDREN?(Children= {&CHILDREN*{&FIRST} "{&NICK}" {&LAST}: and })}: and }
 things: {THINGS*Did you eat a &? Wow!: }
 things2: {..?Args!:No args :(}
+hmm: {2??oh}
+hmm2: {4??}
+hmm3: { 2 ??}
+hmm4: { 4 ??wow}

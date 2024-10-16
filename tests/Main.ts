@@ -1,6 +1,7 @@
 import chai from "chai"
 import chaiAsPromised from "chai-as-promised"
 import fs from "fs"
+import { inspect } from "util"
 import Weaving from "../build/Weaving"
 
 chai.use(chaiAsPromised)
@@ -44,7 +45,7 @@ fs.createReadStream("test.quilt")
 					THINGS: ["Pineapple", "Banana", "Fudge Sundae"],
 				}, "hi", "wow")
 				// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-				console.log(key, result.content, result.toString())
+				console.log(key, inspect(result.content, undefined, Infinity, true), inspect(result.toString(), undefined, undefined, true))
 			}
 		} catch (err: any) {
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access

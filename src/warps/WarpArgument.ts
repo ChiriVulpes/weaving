@@ -9,13 +9,13 @@ export default new Warp()
 	.setTokeniser(tokeniseArgument)
 
 export function tokeniseArgument (walker: StringWalker, match: Match, api: IWarpAPI, valueMode = false) {
-	walker.walkWhitespace()
+	const whitespaceBefore = walker.walkWhitespace()
 	const argument = walker.walkArgument() ?? ""
-	if (argument)
-		walker.walkWhitespace()
+	const whitespaceAfter = argument && walker.walkWhitespace()
 
 	const join = walker.walkChar("*")
-	if (!argument && !join && !valueMode)
+	const orElse = !join && walker.walkSubstr("??")
+	if (!argument && !join && !valueMode && !orElse)
 		return undefined
 
 	let accessor = IArgument.accessor(argument)
@@ -28,13 +28,20 @@ export function tokeniseArgument (walker: StringWalker, match: Match, api: IWarp
 		}
 
 		const entry = !entryTokens ? ""
-			: `,v=>c([${entryTokens.map(token => token instanceof ValueToken ? "{content:v}" : token.compiled).join(",")}])`
+			: `,v=>[${entryTokens.map(token => token instanceof ValueToken ? "{content:v}" : token.compiled).join(",")}]`
 
-		accessor = `j(${accessor},\`${separatorTokens.map(token => token.string ?? "").join("")}\`${entry})`
+		accessor = `j(${accessor},[${separatorTokens.map(token => token.compiled).join(",")}]${entry})`
+
+	} else if (orElse) {
+		const orElseTokens = api.tokenise(walker, match.end)
+		const orElseString = `[${orElseTokens.map(token => token.compiled).join(",")}]`
+		const whitespacedValue = !whitespaceBefore && !whitespaceAfter ? accessor
+			: `[${whitespaceBefore && `{content:"${whitespaceBefore}"},`}${accessor}${whitespaceAfter && `,{content:"${whitespaceAfter}"}`}]`
+		accessor = `(${accessor}?${whitespacedValue}:${orElseString})`
 	}
 
 	return new Token()
-		.addArgument(argument, "any")
+		.addArgument(argument, "WeavingArg")
 		.setCompiled({ content: accessor }, Token.rawGenerator(accessor))
 }
 

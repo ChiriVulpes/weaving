@@ -65,15 +65,17 @@ export default class StringWalker {
 	}
 
 	public walkWhitespace () {
+		let whitespace = ""
 		let char = this.char
 		do {
 			if (char !== " " && char !== "\t" && char !== "\r" && char !== "\n")
 				break
 
+			whitespace += char
 			char = this.next()
 		} while (char)
 
-		return this
+		return whitespace
 	}
 
 	public walkArgument () {
@@ -94,8 +96,14 @@ export default class StringWalker {
 			char = this.next()
 		} while (char)
 
-		if (this.walkWhitespace().walkSubstr(".."))
+		this.save()
+		this.walkWhitespace()
+		if (this.walkSubstr("..")) {
+			this.unsave()
 			argument += ".."
+		} else {
+			this.restore()
+		}
 
 		return argument || undefined
 	}

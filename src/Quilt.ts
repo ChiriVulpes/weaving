@@ -8,10 +8,10 @@ const UMD_HEADER = "(function(factory){if(typeof module===\"object\"&&typeof mod
 const UMD_FOOTER = "})"
 
 const FUNCTIONS = {
-	STRINGIFY: "let s=t=>Array.isArray(t)?t.map(s).join(\"\"):typeof t.content==\"object\"?s(t.content):t.content;",
+	STRINGIFY: "let s=t=>typeof t==\"string\"?t:Array.isArray(t)?t.map(s).join(\"\"):typeof t.content==\"object\"?s(t.content):t.content;",
 	IS_ITERABLE: "let ii=u=>(typeof u==\"object\"||typeof u==\"function\")&&Symbol.iterator in u;",
 	CONTENT: "let c=c=>({content:c,toString(){return s(this.content)}});",
-	JOIN: "let j=(a,s,v)=>{a=(!a?[]:Array.isArray(a)?a:ii(a)?[...a]:[a]);a=v?a.map(v):a;return a.join(s)};",
+	JOIN: "let j=(a,s,v)=>{a=(!a?[]:Array.isArray(a)?a:ii(a)?[...a]:[a]);return (v?a.map(v):a).flatMap((v,i)=>i<a.length-1?[].concat(v,s):v)};",
 	LENGTH: "let l=v=>!v?0:typeof v.length==\"number\"?v.length:typeof v.size==\"number\"?v.size:ii(v)?[...v].length:typeof v==\"object\"?Object.keys(v).length:0;",
 }
 
@@ -22,11 +22,11 @@ export interface Weave {
 }
 
 export interface Weft {
-	content: StringResolvable;
+	content: WeavingArg | Weft[];
 `
 const QUILT_HEADER_POST_WEFT = `}
 	
-export type StringResolvable = string | Weft[];
+export type WeavingArg = Weave | string | number | undefined | null;
 
 export interface Quilt {
 `
@@ -38,7 +38,7 @@ declare const quilt: Quilt;
 export namespace Quilt {
 	export type Key = keyof Quilt
 	export type SimpleKey = keyof { [KEY in keyof Quilt as Parameters<Quilt[KEY]>["length"] extends 0 ? KEY : never]: true }
-	export type Handler = (quilt: Quilt) => Weave
+	export type Handler<ARGS extends any[] = []> = (quilt: Quilt, ...args: ARGS) => Weave
 }
 
 export default quilt;
