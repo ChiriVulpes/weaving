@@ -10,7 +10,7 @@ export default class StringWalker {
     walk(amount: number): this;
     walkTo(index: number): this;
     walkUntil(substr: string): this;
-    walkWhitespace(): this;
+    walkWhitespace(): string;
     walkArgument(): string | undefined;
     walkFloat(canHaveBigInt?: boolean): number | bigint | undefined;
     walkInteger(canHaveBigInt?: boolean): number | bigint | undefined;

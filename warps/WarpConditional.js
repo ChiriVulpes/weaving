@@ -39,10 +39,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const Warp_1 = __importDefault(require("../Warp"));
     exports.default = new Warp_1.default()
         .setTokeniser((walker, match, api) => {
+        walker.save();
         walker.walkWhitespace();
         let argument;
         let checkExpression;
-        walker.save();
         ArgumentMode: {
             let inverted = false;
             if (walker.walkSubstr("!")) {
@@ -57,6 +57,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 argument = undefined;
                 break ArgumentMode;
             }
+            if (walker.walkSubstr("?")) {
+                // handled by argument warp
+                walker.restore();
+                return undefined;
+            }
             checkExpression = `${inverted ? "!" : ""}${Token_1.IArgument.accessor(argument)}`;
         }
         if (argument)
@@ -64,8 +69,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         else {
             walker.restore();
             return undefined;
-            // not single-argument mode
-            walker.restore();
             // const 
         }
         const ifTrue = api.tokenise(walker, [":", ...match.end]);

@@ -39,12 +39,12 @@ var __importStar = (this && this.__importStar) || function (mod) {
     exports.default = new Warp_1.default()
         .setTokeniser(tokeniseArgument);
     function tokeniseArgument(walker, match, api, valueMode = false) {
-        walker.walkWhitespace();
+        const whitespaceBefore = walker.walkWhitespace();
         const argument = walker.walkArgument() ?? "";
-        if (argument)
-            walker.walkWhitespace();
+        const whitespaceAfter = argument && walker.walkWhitespace();
         const join = walker.walkChar("*");
-        if (!argument && !join && !valueMode)
+        const orElse = !join && walker.walkSubstr("??");
+        if (!argument && !join && !valueMode && !orElse)
             return undefined;
         let accessor = Token_1.IArgument.accessor(argument);
         if (join) {
@@ -55,11 +55,18 @@ var __importStar = (this && this.__importStar) || function (mod) {
                 separatorTokens = api.tokenise(walker, match.end);
             }
             const entry = !entryTokens ? ""
-                : `,v=>c([${entryTokens.map(token => token instanceof ValueToken ? "{content:v}" : token.compiled).join(",")}])`;
-            accessor = `j(${accessor},\`${separatorTokens.map(token => token.string ?? "").join("")}\`${entry})`;
+                : `,v=>[${entryTokens.map(token => token instanceof ValueToken ? "{content:v}" : token.compiled).join(",")}]`;
+            accessor = `j(${accessor},[${separatorTokens.map(token => token.compiled).join(",")}]${entry})`;
+        }
+        else if (orElse) {
+            const orElseTokens = api.tokenise(walker, match.end);
+            const orElseString = `[${orElseTokens.map(token => token.compiled).join(",")}]`;
+            const whitespacedValue = !whitespaceBefore && !whitespaceAfter ? accessor
+                : `[${whitespaceBefore && `{content:"${whitespaceBefore}"},`}${accessor}${whitespaceAfter && `,{content:"${whitespaceAfter}"}`}]`;
+            accessor = `(${accessor}?${whitespacedValue}:${orElseString})`;
         }
         return new Token_1.default()
-            .addArgument(argument, "any")
+            .addArgument(argument, "WeavingArg")
             .setCompiled({ content: accessor }, Token_1.default.rawGenerator(accessor));
     }
     // internal warp for matching & inside a join warp
