@@ -52,6 +52,7 @@ const enum Mode {
 	Translation,
 	TranslationOrEntry,
 	TranslationOrDictionaryOrEntry,
+	Reference,
 }
 
 function unpathify (dictionary: string) {
@@ -65,6 +66,7 @@ function pathify (...path: string[][]) {
 export interface IQuiltOptions {
 	/** Replace the default weaving function with an edited implementation. The default implementation resides in `Weave.compile` */
 	weave?: typeof Weave.compile
+	whitespace?: true
 }
 
 export class QuiltError extends Error {
@@ -81,7 +83,13 @@ export default class Quilt {
 		WarpArgument,
 	]
 
+	private tab: string
+	private space: string
+	private newline: string
 	public constructor (private readonly options?: IQuiltOptions, private readonly warps = Quilt.DEFAULT_WARPS) {
+		this.tab = this.options?.whitespace ? "\t" : ""
+		this.space = this.options?.whitespace ? " " : ""
+		this.newline = this.options?.whitespace ? "\n" : ""
 	}
 
 	private scriptConsumer?: (chunk: string) => any
@@ -103,7 +111,7 @@ export default class Quilt {
 	}
 
 	public start () {
-		this.scriptConsumer?.(`${UMD_HEADER}${Object.values(FUNCTIONS).join("")}exports.default={`)
+		this.scriptConsumer?.(`${UMD_HEADER}${Object.values(FUNCTIONS).join("")}var q={${this.newline}`)
 		this.definitionsConsumer?.(QUILT_HEADER_PRE_WEFT)
 		for (const warp of this.warps ?? [])
 			for (const [property, type] of warp["_weftProperties"])
@@ -216,6 +224,10 @@ export default class Quilt {
 							mode = Mode.Translation
 							continue
 
+						case "=":
+							mode = Mode.Reference
+							continue
+
 						default:
 							if (char !== "\r")
 								pendingEntry += char
@@ -237,6 +249,14 @@ export default class Quilt {
 
 						case "\\":
 							nextEscaped = true
+							continue
+
+						case "=":
+							this.pushEntry(pendingEntry, pendingTranslation)
+							pendingEntry = pendingTranslationOrEntry
+							pendingTranslationOrEntry = ""
+							pendingTranslation = ""
+							mode = Mode.Reference
 							continue
 
 						case ":":
@@ -262,6 +282,34 @@ export default class Quilt {
 
 					switch (char) {
 						case "\n":
+							this.pushEntry(pendingEntry, pendingTranslation)
+							pendingEntry = ""
+							pendingTranslation = ""
+							mode = Mode.TranslationOrDictionaryOrEntry
+							continue
+
+						case "\\":
+							nextEscaped = true
+							continue
+
+						default:
+							if (char !== "\r")
+								pendingTranslation += char
+							continue
+					}
+
+				case Mode.Reference:
+					if (nextEscaped && char !== "\r") {
+						pendingTranslation += char
+						nextEscaped = false
+						continue
+					}
+
+					switch (char) {
+						case "\n":
+							this.pushReference(pendingEntry, pendingTranslation)
+							pendingEntry = ""
+							pendingTranslation = ""
 							mode = Mode.TranslationOrDictionaryOrEntry
 							continue
 
@@ -297,18 +345,29 @@ export default class Quilt {
 				break
 		}
 
-		this.scriptConsumer?.(`}${UMD_FOOTER}`)
+		this.scriptConsumer?.(`};exports.default=q${UMD_FOOTER}`)
 		this.definitionsConsumer?.(QUILT_FOOTER)
 		return this
 	}
 
 	private pushEntry (pendingEntry = this.pendingEntry, pendingTranslation = this.pendingTranslation) {
+		if (!pendingEntry || !pendingTranslation)
+			return
+
 		const entry = pathify(...this.dictionaries, unpathify(pendingEntry))
 		if (pendingTranslation[0] === " ")
 			pendingTranslation = pendingTranslation.trim()
 		const compile = this.options?.weave ?? Weave.compile
 		const translation = compile(pendingTranslation, this.warps)
-		this.scriptConsumer?.(`"${entry}":${translation.script},`)
+		this.scriptConsumer?.(`${this.tab}"${entry}":${this.space}${translation.script},${this.newline}`)
 		this.definitionsConsumer?.(`\t"${entry}"${translation.definitions};\n`)
+	}
+
+	private pushReference (pendingEntry = this.pendingEntry, pendingTranslation = this.pendingTranslation) {
+		const entry = pathify(...this.dictionaries, unpathify(pendingEntry))
+		if (pendingTranslation[0] === " ")
+			pendingTranslation = pendingTranslation.trim()
+		this.scriptConsumer?.(`${this.tab}"${entry}":${this.space}(...a) => q["${pendingTranslation}"](...a),${this.newline}`)
+		this.definitionsConsumer?.(`\t"${entry}": Quilt["${pendingTranslation}"];\n`)
 	}
 }

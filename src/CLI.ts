@@ -66,11 +66,12 @@ function color (text: string, color: keyof typeof AnsicolorModule): string {
 const argv = yargs(hideBin(process.argv))
 	.alias("v", "version")
 	.options({
-		out: { type: "string", alias: "o", description: "A directory that compiled `.js` files will reside in. By default, files are compiled to the same directory as their respective `.quilt` files." },
-		outTypes: { type: "string", description: "A directory that compiled `.d.ts` files will reside in. By default, files are compiled to the same directory as specified in `--out`, or the same directory as their respective `.quilt` files if there is no out directory specified." },
-		types: { type: "boolean", alias: "t", description: "Whether weaving should output `.d.ts` TypeScript definition files.", default: true },
+		out: { type: "string", alias: "o", description: "A directory that emitted `.js` files will reside in. By default, files are emitted to the same directory as their respective `.quilt` files." },
+		outTypes: { type: "string", description: "A directory that emitted `.d.ts` files will reside in. By default, files are emitted to the same directory as specified in `--out`, or the same directory as their respective `.quilt` files if there is no out directory specified." },
+		types: { type: "boolean", alias: "t", description: "Whether weaving should emit `.d.ts` TypeScript definition files.", default: true },
 		watch: { type: "boolean", alias: "w", description: "Whether the provided paths will be watched for changes." },
 		verbose: { type: "boolean", description: "Whether to print internal error stacks on compilation errors." },
+		outWhitespace: { type: "boolean", description: "Whether to include whitespace in the emitted `.js` files." },
 	})
 	.parseSync()
 
@@ -149,7 +150,7 @@ async function compileFile (file: string) {
 	await fs.promises.mkdir(path.dirname(dts), { recursive: true })
 
 	return new Promise<void>(resolve => {
-		const quilt = Weaving.createQuiltTransformer()
+		const quilt = Weaving.createQuiltTransformer({ whitespace: argv.outWhitespace || undefined })
 		if (argv.types)
 			quilt.definitions.pipe(fs.createWriteStream(dts))
 		const readStream = fs.createReadStream(file)
