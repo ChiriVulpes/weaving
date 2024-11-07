@@ -77,9 +77,15 @@ export default quilt;
             WarpConditional_1.default,
             WarpArgument_1.default,
         ];
+        tab;
+        space;
+        newline;
         constructor(options, warps = Quilt.DEFAULT_WARPS) {
             this.options = options;
             this.warps = warps;
+            this.tab = this.options?.whitespace ? "\t" : "";
+            this.space = this.options?.whitespace ? " " : "";
+            this.newline = this.options?.whitespace ? "\n" : "";
         }
         scriptConsumer;
         onScript(consumer) {
@@ -97,7 +103,7 @@ export default quilt;
             return this;
         }
         start() {
-            this.scriptConsumer?.(`${UMD_HEADER}${Object.values(FUNCTIONS).join("")}exports.default={`);
+            this.scriptConsumer?.(`${UMD_HEADER}${Object.values(FUNCTIONS).join("")}var q={${this.newline}`);
             this.definitionsConsumer?.(QUILT_HEADER_PRE_WEFT);
             for (const warp of this.warps ?? [])
                 for (const [property, type] of warp["_weftProperties"])
@@ -196,6 +202,9 @@ export default quilt;
                             case ":":
                                 mode = 4 /* Mode.Translation */;
                                 continue;
+                            case "=":
+                                mode = 7 /* Mode.Reference */;
+                                continue;
                             default:
                                 if (char !== "\r")
                                     pendingEntry += char;
@@ -214,6 +223,13 @@ export default quilt;
                                 continue;
                             case "\\":
                                 nextEscaped = true;
+                                continue;
+                            case "=":
+                                this.pushEntry(pendingEntry, pendingTranslation);
+                                pendingEntry = pendingTranslationOrEntry;
+                                pendingTranslationOrEntry = "";
+                                pendingTranslation = "";
+                                mode = 7 /* Mode.Reference */;
                                 continue;
                             case ":":
                                 this.pushEntry(pendingEntry, pendingTranslation);
@@ -235,6 +251,30 @@ export default quilt;
                         }
                         switch (char) {
                             case "\n":
+                                this.pushEntry(pendingEntry, pendingTranslation);
+                                pendingEntry = "";
+                                pendingTranslation = "";
+                                mode = 6 /* Mode.TranslationOrDictionaryOrEntry */;
+                                continue;
+                            case "\\":
+                                nextEscaped = true;
+                                continue;
+                            default:
+                                if (char !== "\r")
+                                    pendingTranslation += char;
+                                continue;
+                        }
+                    case 7 /* Mode.Reference */:
+                        if (nextEscaped && char !== "\r") {
+                            pendingTranslation += char;
+                            nextEscaped = false;
+                            continue;
+                        }
+                        switch (char) {
+                            case "\n":
+                                this.pushReference(pendingEntry, pendingTranslation);
+                                pendingEntry = "";
+                                pendingTranslation = "";
                                 mode = 6 /* Mode.TranslationOrDictionaryOrEntry */;
                                 continue;
                             case "\\":
@@ -264,18 +304,27 @@ export default quilt;
                     this.pushEntry();
                     break;
             }
-            this.scriptConsumer?.(`}${UMD_FOOTER}`);
+            this.scriptConsumer?.(`};exports.default=q${UMD_FOOTER}`);
             this.definitionsConsumer?.(QUILT_FOOTER);
             return this;
         }
         pushEntry(pendingEntry = this.pendingEntry, pendingTranslation = this.pendingTranslation) {
+            if (!pendingEntry || !pendingTranslation)
+                return;
             const entry = pathify(...this.dictionaries, unpathify(pendingEntry));
             if (pendingTranslation[0] === " ")
                 pendingTranslation = pendingTranslation.trim();
             const compile = this.options?.weave ?? Weave_1.default.compile;
             const translation = compile(pendingTranslation, this.warps);
-            this.scriptConsumer?.(`"${entry}":${translation.script},`);
+            this.scriptConsumer?.(`${this.tab}"${entry}":${this.space}${translation.script},${this.newline}`);
             this.definitionsConsumer?.(`\t"${entry}"${translation.definitions};\n`);
+        }
+        pushReference(pendingEntry = this.pendingEntry, pendingTranslation = this.pendingTranslation) {
+            const entry = pathify(...this.dictionaries, unpathify(pendingEntry));
+            if (pendingTranslation[0] === " ")
+                pendingTranslation = pendingTranslation.trim();
+            this.scriptConsumer?.(`${this.tab}"${entry}":${this.space}(...a) => q["${pendingTranslation}"](...a),${this.newline}`);
+            this.definitionsConsumer?.(`\t"${entry}": Quilt["${pendingTranslation}"];\n`);
         }
     }
     exports.default = Quilt;

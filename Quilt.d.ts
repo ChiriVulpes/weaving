@@ -3,6 +3,7 @@ import Weave from "./Weave";
 export interface IQuiltOptions {
     /** Replace the default weaving function with an edited implementation. The default implementation resides in `Weave.compile` */
     weave?: typeof Weave.compile;
+    whitespace?: true;
 }
 export declare class QuiltError extends Error {
     readonly line: number;
@@ -13,6 +14,9 @@ export default class Quilt {
     private readonly options?;
     private readonly warps;
     static DEFAULT_WARPS: Warp[];
+    private tab;
+    private space;
+    private newline;
     constructor(options?: IQuiltOptions | undefined, warps?: Warp[]);
     private scriptConsumer?;
     onScript(consumer: (chunk: string) => any): this;
@@ -35,4 +39,5 @@ export default class Quilt {
     transform(chunk: string): this;
     complete(): this;
     private pushEntry;
+    private pushReference;
 }
