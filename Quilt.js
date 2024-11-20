@@ -118,6 +118,8 @@ export default quilt;
         pendingEntry = "";
         nextEscaped = false;
         pendingTranslation = "";
+        pendingReference = "";
+        pendingReferenceParameters = [];
         pendingTranslationOrEntry = "";
         line = 0;
         column = 0;
@@ -131,6 +133,8 @@ export default quilt;
             let pendingEntry = this.pendingEntry;
             let nextEscaped = this.nextEscaped;
             let pendingTranslation = this.pendingTranslation;
+            let pendingReference = this.pendingTranslation;
+            const pendingReferenceParameters = this.pendingReferenceParameters;
             let pendingTranslationOrEntry = this.pendingTranslationOrEntry;
             for (let i = 0; i < chunk.length; i++) {
                 const char = chunk[i];
@@ -150,6 +154,23 @@ export default quilt;
                             this.pushEntry(pendingEntry, pendingTranslation);
                             pendingEntry = "";
                             pendingTranslation = "";
+                        }
+                        break;
+                    case 9 /* Mode.ReferenceParameterOrDictionaryOrEntry */:
+                        if (char === "#")
+                            mode = 2 /* Mode.DictionaryLevel */;
+                        else if (char === "\t" && chunk[i + 1] === "|") {
+                            mode = 8 /* Mode.ReferenceParameter */;
+                            i++;
+                            this.column++;
+                        }
+                        else
+                            mode = 1 /* Mode.CommentOrEntry */;
+                        if (mode !== 8 /* Mode.ReferenceParameter */) {
+                            this.pushReference(pendingEntry, pendingReference, pendingReferenceParameters);
+                            pendingEntry = "";
+                            pendingReference = "";
+                            pendingReferenceParameters.splice(0, Infinity);
                         }
                         break;
                 }
@@ -266,16 +287,46 @@ export default quilt;
                         }
                     case 7 /* Mode.Reference */:
                         if (nextEscaped && char !== "\r") {
+                            pendingReference += char;
+                            nextEscaped = false;
+                            continue;
+                        }
+                        switch (char) {
+                            case "\n":
+                                this.pushReference(pendingEntry, pendingReference, pendingReferenceParameters);
+                                pendingEntry = "";
+                                pendingReference = "";
+                                pendingReferenceParameters.splice(0, Infinity);
+                                mode = 6 /* Mode.TranslationOrDictionaryOrEntry */;
+                                continue;
+                            case "\\":
+                                nextEscaped = true;
+                                continue;
+                            case "|":
+                                mode = 8 /* Mode.ReferenceParameter */;
+                                continue;
+                            case " ":
+                                if (chunk[i + 1] === "|") {
+                                    mode = 8 /* Mode.ReferenceParameter */;
+                                    continue;
+                                }
+                            // eslint-disable-next-line no-fallthrough
+                            default:
+                                if (char !== "\r")
+                                    pendingReference += char;
+                                continue;
+                        }
+                    case 8 /* Mode.ReferenceParameter */:
+                        if (nextEscaped && char !== "\r") {
                             pendingTranslation += char;
                             nextEscaped = false;
                             continue;
                         }
                         switch (char) {
                             case "\n":
-                                this.pushReference(pendingEntry, pendingTranslation);
-                                pendingEntry = "";
+                                pendingReferenceParameters.push(pendingTranslation);
                                 pendingTranslation = "";
-                                mode = 6 /* Mode.TranslationOrDictionaryOrEntry */;
+                                mode = 9 /* Mode.ReferenceParameterOrDictionaryOrEntry */;
                                 continue;
                             case "\\":
                                 nextEscaped = true;
@@ -293,6 +344,7 @@ export default quilt;
             this.pendingEntry = pendingEntry;
             this.nextEscaped = nextEscaped;
             this.pendingTranslation = pendingTranslation;
+            this.pendingReference = pendingReference;
             this.pendingTranslationOrEntry = pendingTranslationOrEntry;
             return this;
         }
@@ -319,12 +371,17 @@ export default quilt;
             this.scriptConsumer?.(`${this.tab}"${entry}":${this.space}${translation.script},${this.newline}`);
             this.definitionsConsumer?.(`\t"${entry}"${translation.definitions};\n`);
         }
-        pushReference(pendingEntry = this.pendingEntry, pendingTranslation = this.pendingTranslation) {
+        pushReference(pendingEntry = this.pendingEntry, pendingReference = this.pendingReference, pendingReferenceParameters = this.pendingReferenceParameters) {
             const entry = pathify(...this.dictionaries, unpathify(pendingEntry));
-            if (pendingTranslation[0] === " ")
-                pendingTranslation = pendingTranslation.trim();
-            this.scriptConsumer?.(`${this.tab}"${entry}":${this.space}(...a) => q["${pendingTranslation}"](...a),${this.newline}`);
-            this.definitionsConsumer?.(`\t"${entry}": Quilt["${pendingTranslation}"];\n`);
+            if (pendingReference[0] === " ")
+                pendingReference = pendingReference.trim();
+            const compile = this.options?.weave ?? Weave_1.default.compile;
+            const translations = pendingReferenceParameters.map(parameter => compile(parameter, this.warps).script + ", ");
+            this.scriptConsumer?.(`${this.tab}"${entry}":${this.space}(...a) => q["${pendingReference}"](${translations.join("")}...a),${this.newline}`);
+            if (!pendingReferenceParameters.length)
+                this.definitionsConsumer?.(`\t"${entry}": Quilt["${pendingReference}"];\n`);
+            else
+                this.definitionsConsumer?.(`\t"${entry}": Quilt["${pendingReference}"] extends (${pendingReferenceParameters.map((_, i) => `_${i}: any, `).join("")}...parameters: infer P) => infer R ? (...parameters: P) => R : never;\n`);
         }
     }
     exports.default = Quilt;

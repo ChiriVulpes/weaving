@@ -32,6 +32,8 @@ export default class Quilt {
     private pendingEntry;
     private nextEscaped;
     private pendingTranslation;
+    private pendingReference;
+    private pendingReferenceParameters;
     private pendingTranslationOrEntry;
     private line;
     private column;
