@@ -53,6 +53,8 @@ const enum Mode {
 	TranslationOrEntry,
 	TranslationOrDictionaryOrEntry,
 	Reference,
+	ReferenceParameter,
+	ReferenceParameterOrDictionaryOrEntry,
 }
 
 function unpathify (dictionary: string) {
@@ -127,6 +129,8 @@ export default class Quilt {
 	private pendingEntry = ""
 	private nextEscaped = false
 	private pendingTranslation = ""
+	private pendingReference = ""
+	private pendingReferenceParameters: string[] = []
 	private pendingTranslationOrEntry = ""
 	private line = 0
 	private column = 0
@@ -142,6 +146,8 @@ export default class Quilt {
 		let pendingEntry = this.pendingEntry
 		let nextEscaped = this.nextEscaped
 		let pendingTranslation = this.pendingTranslation
+		let pendingReference = this.pendingTranslation
+		const pendingReferenceParameters = this.pendingReferenceParameters
 		let pendingTranslationOrEntry = this.pendingTranslationOrEntry
 
 		for (let i = 0; i < chunk.length; i++) {
@@ -161,6 +167,23 @@ export default class Quilt {
 						this.pushEntry(pendingEntry, pendingTranslation)
 						pendingEntry = ""
 						pendingTranslation = ""
+					}
+					break
+				case Mode.ReferenceParameterOrDictionaryOrEntry:
+					if (char === "#")
+						mode = Mode.DictionaryLevel
+					else if (char === "\t" && chunk[i + 1] === "|") {
+						mode = Mode.ReferenceParameter
+						i++
+						this.column++
+					} else
+						mode = Mode.CommentOrEntry
+
+					if (mode !== Mode.ReferenceParameter) {
+						this.pushReference(pendingEntry, pendingReference, pendingReferenceParameters)
+						pendingEntry = ""
+						pendingReference = ""
+						pendingReferenceParameters.splice(0, Infinity)
 					}
 					break
 			}
@@ -300,6 +323,43 @@ export default class Quilt {
 
 				case Mode.Reference:
 					if (nextEscaped && char !== "\r") {
+						pendingReference += char
+						nextEscaped = false
+						continue
+					}
+
+					switch (char) {
+						case "\n":
+							this.pushReference(pendingEntry, pendingReference, pendingReferenceParameters)
+							pendingEntry = ""
+							pendingReference = ""
+							pendingReferenceParameters.splice(0, Infinity)
+							mode = Mode.TranslationOrDictionaryOrEntry
+							continue
+
+						case "\\":
+							nextEscaped = true
+							continue
+
+						case "|":
+							mode = Mode.ReferenceParameter
+							continue
+
+						case " ":
+							if (chunk[i + 1] === "|") {
+								mode = Mode.ReferenceParameter
+								continue
+							}
+
+						// eslint-disable-next-line no-fallthrough
+						default:
+							if (char !== "\r")
+								pendingReference += char
+							continue
+					}
+
+				case Mode.ReferenceParameter:
+					if (nextEscaped && char !== "\r") {
 						pendingTranslation += char
 						nextEscaped = false
 						continue
@@ -307,10 +367,9 @@ export default class Quilt {
 
 					switch (char) {
 						case "\n":
-							this.pushReference(pendingEntry, pendingTranslation)
-							pendingEntry = ""
+							pendingReferenceParameters.push(pendingTranslation)
 							pendingTranslation = ""
-							mode = Mode.TranslationOrDictionaryOrEntry
+							mode = Mode.ReferenceParameterOrDictionaryOrEntry
 							continue
 
 						case "\\":
@@ -332,6 +391,7 @@ export default class Quilt {
 		this.pendingEntry = pendingEntry
 		this.nextEscaped = nextEscaped
 		this.pendingTranslation = pendingTranslation
+		this.pendingReference = pendingReference
 		this.pendingTranslationOrEntry = pendingTranslationOrEntry
 		return this
 	}
@@ -363,11 +423,17 @@ export default class Quilt {
 		this.definitionsConsumer?.(`\t"${entry}"${translation.definitions};\n`)
 	}
 
-	private pushReference (pendingEntry = this.pendingEntry, pendingTranslation = this.pendingTranslation) {
+	private pushReference (pendingEntry = this.pendingEntry, pendingReference = this.pendingReference, pendingReferenceParameters = this.pendingReferenceParameters) {
 		const entry = pathify(...this.dictionaries, unpathify(pendingEntry))
-		if (pendingTranslation[0] === " ")
-			pendingTranslation = pendingTranslation.trim()
-		this.scriptConsumer?.(`${this.tab}"${entry}":${this.space}(...a) => q["${pendingTranslation}"](...a),${this.newline}`)
-		this.definitionsConsumer?.(`\t"${entry}": Quilt["${pendingTranslation}"];\n`)
+		if (pendingReference[0] === " ")
+			pendingReference = pendingReference.trim()
+		const compile = this.options?.weave ?? Weave.compile
+		const translations = pendingReferenceParameters.map(parameter => compile(parameter, this.warps).script + ", ")
+		this.scriptConsumer?.(`${this.tab}"${entry}":${this.space}(...a) => q["${pendingReference}"](${translations.join("")}...a),${this.newline}`)
+
+		if (!pendingReferenceParameters.length)
+			this.definitionsConsumer?.(`\t"${entry}": Quilt["${pendingReference}"];\n`)
+		else
+			this.definitionsConsumer?.(`\t"${entry}": Quilt["${pendingReference}"] extends (${pendingReferenceParameters.map((_, i) => `_${i}: any, `).join("")}...parameters: infer P) => infer R ? (...parameters: P) => R : never;\n`)
 	}
 }
