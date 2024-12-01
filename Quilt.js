@@ -47,7 +47,7 @@ declare const quilt: Quilt;
 
 export namespace Quilt {
 	export type Key = keyof Quilt
-	export type SimpleKey = keyof { [KEY in keyof Quilt as Parameters<Quilt[KEY]>["length"] extends 0 ? KEY : never]: true }
+	export type SimpleKey = keyof { [KEY in keyof Quilt as Parameters<Quilt[KEY]> extends [infer First, ...infer Rest] ? never : KEY]: true }
 	export type Handler<ARGS extends any[] = []> = (quilt: Quilt, ...args: ARGS) => Weave
 }
 
