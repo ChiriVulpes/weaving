@@ -41,7 +41,7 @@ export function tokeniseArgument (walker: StringWalker, match: Match, api: IWarp
 	}
 
 	return new Token()
-		.addArgument(argument, "WeavingArg")
+		.addArgument(argument, "WeavingArg", !!orElse)
 		.setCompiled({ content: accessor }, Token.rawGenerator(accessor))
 }
 
