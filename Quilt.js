@@ -183,7 +183,7 @@ export default quilt;
                         continue;
                     case 3 /* Mode.Dictionary */:
                         if (nextEscaped && char !== "\r") {
-                            pendingDictionary += char;
+                            pendingDictionary += char === "n" ? "\n" : char;
                             nextEscaped = false;
                             continue;
                         }
@@ -208,7 +208,7 @@ export default quilt;
                         }
                     case 1 /* Mode.CommentOrEntry */:
                         if (nextEscaped && char !== "\r") {
-                            pendingEntry += char;
+                            pendingEntry += char === "n" ? "\n" : char;
                             nextEscaped = false;
                             continue;
                         }
@@ -233,7 +233,7 @@ export default quilt;
                         }
                     case 5 /* Mode.TranslationOrEntry */:
                         if (nextEscaped && char !== "\r") {
-                            pendingTranslationOrEntry += char;
+                            pendingTranslationOrEntry += char === "n" ? "\n" : char;
                             nextEscaped = false;
                             continue;
                         }
@@ -266,7 +266,7 @@ export default quilt;
                         }
                     case 4 /* Mode.Translation */:
                         if (nextEscaped && char !== "\r") {
-                            pendingTranslation += char;
+                            pendingTranslation += char === "n" ? "\n" : char;
                             nextEscaped = false;
                             continue;
                         }
@@ -287,7 +287,7 @@ export default quilt;
                         }
                     case 7 /* Mode.Reference */:
                         if (nextEscaped && char !== "\r") {
-                            pendingReference += char;
+                            pendingReference += char === "n" ? "\n" : char;
                             nextEscaped = false;
                             continue;
                         }
@@ -318,7 +318,7 @@ export default quilt;
                         }
                     case 8 /* Mode.ReferenceParameter */:
                         if (nextEscaped && char !== "\r") {
-                            pendingTranslation += char;
+                            pendingTranslation += char === "n" ? "\n" : char;
                             nextEscaped = false;
                             continue;
                         }
