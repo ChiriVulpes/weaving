@@ -439,7 +439,7 @@ export default class Quilt {
 		if (pendingReference[0] === " ")
 			pendingReference = pendingReference.trim()
 		const compile = this.options?.weave ?? Weave.compile
-		const translations = pendingReferenceParameters.map(parameter => compile(parameter, this.warps).script + ", ")
+		const translations = pendingReferenceParameters.map(parameter => `(${compile(parameter.trim(), this.warps).script})(),`)
 		this.scriptConsumer?.(`${this.tab}"${entry}":${this.space}(...a) => q["${pendingReference}"](${translations.join("")}...a),${this.newline}`)
 
 		if (!pendingReferenceParameters.length)
