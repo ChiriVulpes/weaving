@@ -358,6 +358,7 @@ export default class Quilt {
 						case " ":
 							if (chunk[i + 1] === "|") {
 								mode = Mode.ReferenceParameter
+								i++
 								continue
 							}
 
