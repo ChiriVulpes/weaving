@@ -17,10 +17,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const WarpConditional_1 = __importDefault(require("./warps/WarpConditional"));
     const WarpTag_1 = __importDefault(require("./warps/WarpTag"));
     const Weave_1 = __importDefault(require("./Weave"));
-    const UMD_HEADER = "(function(factory){if(typeof module===\"object\"&&typeof module.exports===\"object\"){var v=factory(require, exports);if(v!==undefined)module.exports=v}else if(typeof define===\"function\"&&define.amd){define([\"require\",\"exports\"],factory);}})(function(require,exports){\"use strict\";Object.defineProperty(exports,\"__esModule\",{value:true});";
+    const UMD_HEADER = "(function(factory){if(typeof module===\"object\"&&typeof module.exports===\"object\"){var v=factory(require, exports);if(v!==undefined)module.exports=v}else if(typeof define===\"function\"&&define.amd){define([\"require\",\"exports\"],factory);}})(function(require,exports){\"use strict\";Object.defineProperty(exports,\"__esModule\",{value:true});let r=Symbol();exports.WeavingArg={setRenderable:t=>(t[r]=true,t),isRenderable:t=>!!t[r]};";
     const UMD_FOOTER = "})";
     const FUNCTIONS = {
-        STRINGIFY: "let s=t=>typeof t==\"string\"?t:Array.isArray(t)?t.map(s).join(\"\"):typeof t.content==\"object\"?s(t.content):t.content;",
+        STRINGIFY: "let s=t=>typeof t==\"string\"?t:Array.isArray(t)?t.map(s).join(\"\"):typeof t!=\"object\"||t===null||!t.content?String(t):typeof t.content==\"object\"?s(t.content):String(t.content);",
         IS_ITERABLE: "let ii=u=>(typeof u==\"object\"||typeof u==\"function\")&&Symbol.iterator in u;",
         CONTENT: "let c=c=>({content:c,toString(){return s(this.content)}});",
         JOIN: "let j=(a,s,v)=>{a=(!a?[]:Array.isArray(a)?a:ii(a)?[...a]:[a]);return (v?a.map(v):a).flatMap((v,i)=>i<a.length-1?[].concat(v,s):v)};",
@@ -36,8 +36,18 @@ export interface Weft {
 	content: WeavingArg | Weft[];
 `;
     const QUILT_HEADER_POST_WEFT = `}
+
+declare const SYMBOL_WEAVING_RENDERABLE: unique symbol;
+
+export interface WeavingRenderable {
+	[SYMBOL_WEAVING_RENDERABLE]: true
+}
 	
-export type WeavingArg = Weave | string | number | undefined | null;
+export type WeavingArg = Weave | WeavingRenderable | string | number | undefined | null;
+export namespace WeavingArg {
+	export function setRenderable<T>(value: T): T & WeavingRenderable;
+	export function isRenderable<T>(value: T): value is T & WeavingRenderable;
+}
 
 export interface Quilt {
 `;
@@ -308,6 +318,7 @@ export default quilt;
                             case " ":
                                 if (chunk[i + 1] === "|") {
                                     mode = 8 /* Mode.ReferenceParameter */;
+                                    i++;
                                     continue;
                                 }
                             // eslint-disable-next-line no-fallthrough
@@ -376,7 +387,7 @@ export default quilt;
             if (pendingReference[0] === " ")
                 pendingReference = pendingReference.trim();
             const compile = this.options?.weave ?? Weave_1.default.compile;
-            const translations = pendingReferenceParameters.map(parameter => compile(parameter, this.warps).script + ", ");
+            const translations = pendingReferenceParameters.map(parameter => `(${compile(parameter.trim(), this.warps).script})(),`);
             this.scriptConsumer?.(`${this.tab}"${entry}":${this.space}(...a) => q["${pendingReference}"](${translations.join("")}...a),${this.newline}`);
             if (!pendingReferenceParameters.length)
                 this.definitionsConsumer?.(`\t"${entry}": Quilt["${pendingReference}"];\n`);
