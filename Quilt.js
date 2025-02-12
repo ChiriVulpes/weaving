@@ -131,6 +131,8 @@ export default quilt;
         pendingReference = "";
         pendingReferenceParameters = [];
         pendingTranslationOrEntry = "";
+        isMultilineTranslation = false;
+        hasIndentedLine = false;
         line = 0;
         column = 0;
         error(reason) {
@@ -146,6 +148,8 @@ export default quilt;
             let pendingReference = this.pendingTranslation;
             const pendingReferenceParameters = this.pendingReferenceParameters;
             let pendingTranslationOrEntry = this.pendingTranslationOrEntry;
+            let isMultilineTranslation = this.isMultilineTranslation;
+            let hasIndentedLine = this.hasIndentedLine;
             for (let i = 0; i < chunk.length; i++) {
                 const char = chunk[i];
                 if (char === "\n")
@@ -280,12 +284,40 @@ export default quilt;
                             nextEscaped = false;
                             continue;
                         }
-                        switch (char) {
-                            case "\n":
+                        if (isMultilineTranslation && !hasIndentedLine) {
+                            if (char === "\t") {
+                                hasIndentedLine = true;
+                                continue;
+                            }
+                            if (char !== "\n" && char !== "\r") {
+                                if (pendingTranslation.endsWith("\n"))
+                                    pendingTranslation = pendingTranslation.slice(0, -1);
                                 this.pushEntry(pendingEntry, pendingTranslation);
                                 pendingEntry = "";
                                 pendingTranslation = "";
-                                mode = 6 /* Mode.TranslationOrDictionaryOrEntry */;
+                                mode = 0 /* Mode.CommentOrDictionaryOrEntry */;
+                                isMultilineTranslation = false;
+                                i--;
+                                continue;
+                            }
+                        }
+                        switch (char) {
+                            case "\n":
+                                if (!pendingTranslation.trim().length) {
+                                    isMultilineTranslation = true;
+                                    continue;
+                                }
+                                if (!isMultilineTranslation) {
+                                    this.pushEntry(pendingEntry, pendingTranslation);
+                                    pendingEntry = "";
+                                    pendingTranslation = "";
+                                    mode = 0 /* Mode.CommentOrDictionaryOrEntry */;
+                                    isMultilineTranslation = false;
+                                }
+                                else {
+                                    pendingTranslation += "\n";
+                                    hasIndentedLine = false;
+                                }
                                 continue;
                             case "\\":
                                 nextEscaped = true;
@@ -357,6 +389,8 @@ export default quilt;
             this.pendingTranslation = pendingTranslation;
             this.pendingReference = pendingReference;
             this.pendingTranslationOrEntry = pendingTranslationOrEntry;
+            this.isMultilineTranslation = isMultilineTranslation;
+            this.hasIndentedLine = hasIndentedLine;
             return this;
         }
         complete() {

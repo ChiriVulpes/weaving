@@ -35,6 +35,8 @@ export default class Quilt {
     private pendingReference;
     private pendingReferenceParameters;
     private pendingTranslationOrEntry;
+    private isMultilineTranslation;
+    private hasIndentedLine;
     private line;
     private column;
     error(reason: string): void;
