@@ -142,6 +142,8 @@ export default class Quilt {
 	private pendingReference = ""
 	private pendingReferenceParameters: string[] = []
 	private pendingTranslationOrEntry = ""
+	private isMultilineTranslation = false
+	private hasIndentedLine = false
 	private line = 0
 	private column = 0
 
@@ -159,6 +161,8 @@ export default class Quilt {
 		let pendingReference = this.pendingTranslation
 		const pendingReferenceParameters = this.pendingReferenceParameters
 		let pendingTranslationOrEntry = this.pendingTranslationOrEntry
+		let isMultilineTranslation = this.isMultilineTranslation
+		let hasIndentedLine = this.hasIndentedLine
 
 		for (let i = 0; i < chunk.length; i++) {
 			const char = chunk[i]
@@ -313,12 +317,45 @@ export default class Quilt {
 						continue
 					}
 
-					switch (char) {
-						case "\n":
+					if (isMultilineTranslation && !hasIndentedLine) {
+						if (char === "\t") {
+							hasIndentedLine = true
+							continue
+						}
+
+						if (char !== "\n" && char !== "\r") {
+							if (pendingTranslation.endsWith("\n"))
+								pendingTranslation = pendingTranslation.slice(0, -1)
+
 							this.pushEntry(pendingEntry, pendingTranslation)
 							pendingEntry = ""
 							pendingTranslation = ""
-							mode = Mode.TranslationOrDictionaryOrEntry
+							mode = Mode.CommentOrDictionaryOrEntry
+							isMultilineTranslation = false
+							i--
+							continue
+						}
+					}
+
+					switch (char) {
+						case "\n":
+							if (!pendingTranslation.trim().length) {
+								isMultilineTranslation = true
+								continue
+							}
+
+							if (!isMultilineTranslation) {
+								this.pushEntry(pendingEntry, pendingTranslation)
+								pendingEntry = ""
+								pendingTranslation = ""
+								mode = Mode.CommentOrDictionaryOrEntry
+								isMultilineTranslation = false
+							}
+							else {
+								pendingTranslation += "\n"
+								hasIndentedLine = false
+							}
+
 							continue
 
 						case "\\":
@@ -404,6 +441,8 @@ export default class Quilt {
 		this.pendingTranslation = pendingTranslation
 		this.pendingReference = pendingReference
 		this.pendingTranslationOrEntry = pendingTranslationOrEntry
+		this.isMultilineTranslation = isMultilineTranslation
+		this.hasIndentedLine = hasIndentedLine
 		return this
 	}
 
