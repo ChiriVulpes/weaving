@@ -152,7 +152,10 @@ async function compileFile (file: string) {
 	return new Promise<void>(resolve => {
 		const quilt = Weaving.createQuiltTransformer({ whitespace: argv.outWhitespace || undefined })
 		if (argv.types)
-			quilt.definitions.pipe(fs.createWriteStream(dts))
+			quilt.definitions.pipe(fs.createWriteStream(dts, {
+				// TODO temp workaround for backpressure
+				highWaterMark: 65536,
+			}))
 		const readStream = fs.createReadStream(file)
 		const stream = readStream
 			.pipe(quilt)

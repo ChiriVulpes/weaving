@@ -111,8 +111,14 @@ export default class QuiltTransformer extends ExtensionClass {
 		const errors: Error[] = []
 		const quilt = new Quilt(options, warps)
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call
-			.onScript(chunk => nodeMode ? this.push(chunk) : controller.enqueue(chunk))
-			.onDefinitions(chunk => nodeMode ? (this.definitions as Readable).push(chunk) : definitionsController.enqueue(chunk as any as ArrayBufferView))
+			.onScript(chunk => {
+				// TODO handle push false (backpressure)
+				nodeMode ? this.push(chunk) : controller.enqueue(chunk)
+			})
+			.onDefinitions(chunk => {
+				// TODO handle push false (backpressure)
+				nodeMode ? (this.definitions as Readable).push(chunk) : definitionsController.enqueue(chunk as any as ArrayBufferView)
+			})
 			.onError(error => errors.push(error))
 
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
