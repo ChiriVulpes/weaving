@@ -144,7 +144,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         return new Promise(resolve => {
             const quilt = Weaving_1.default.createQuiltTransformer({ whitespace: argv.outWhitespace || undefined });
             if (argv.types)
-                quilt.definitions.pipe(fs_1.default.createWriteStream(dts));
+                quilt.definitions.pipe(fs_1.default.createWriteStream(dts, {
+                    // TODO temp workaround for backpressure
+                    highWaterMark: 65536,
+                }));
             const readStream = fs_1.default.createReadStream(file);
             const stream = readStream
                 .pipe(quilt)

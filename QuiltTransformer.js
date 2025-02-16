@@ -83,8 +83,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             const errors = [];
             const quilt = new Quilt_1.default(options, warps)
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call
-                .onScript(chunk => nodeMode ? this.push(chunk) : controller.enqueue(chunk))
-                .onDefinitions(chunk => nodeMode ? this.definitions.push(chunk) : definitionsController.enqueue(chunk))
+                .onScript(chunk => {
+                // TODO handle push false (backpressure)
+                nodeMode ? this.push(chunk) : controller.enqueue(chunk);
+            })
+                .onDefinitions(chunk => {
+                // TODO handle push false (backpressure)
+                nodeMode ? this.definitions.push(chunk) : definitionsController.enqueue(chunk);
+            })
                 .onError(error => errors.push(error));
             // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             super(...nodeMode ? [] : [{
