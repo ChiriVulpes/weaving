@@ -15,6 +15,7 @@ export default class Weave implements IWarpAPI {
 		const argTypes: Set<string>[] = []
 		let lastRequiredIndex = -1
 		const optionals: boolean[] = []
+		let hasRest = false
 
 		for (const token of tokens) {
 			if (!token.compiled)
@@ -22,7 +23,12 @@ export default class Weave implements IWarpAPI {
 
 			compiled += `${token.compiled},`
 
-			for (const { path, type, optional } of token.args ?? []) {
+			for (const { path, type, optional, rest } of token.args ?? []) {
+				if (rest) {
+					hasRest = true
+					break
+				}
+
 				const keys = path.split(".")
 				if (keys.length === 0)
 					continue
@@ -57,6 +63,9 @@ export default class Weave implements IWarpAPI {
 					return `arg_${i}${lastRequiredIndex < i ? "?" : ""}: ${optionals[i] && lastRequiredIndex >= i ? `(${type}) | undefined` : type}`
 				})
 				.join(", ")
+
+		if (hasRest)
+			args += `${args ? ", " : ""}...args: WeavingArg[]`
 
 		return {
 			script: `${args ? "(...a)" : "_"}=>c([${compiled}])`,

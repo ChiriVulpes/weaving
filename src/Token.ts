@@ -2,6 +2,7 @@ export interface IArgument {
 	path: string
 	type: string
 	optional: boolean
+	rest: boolean
 }
 
 export namespace IArgument {
@@ -94,8 +95,11 @@ class Token implements IToken {
 	}
 
 	public args: IArgument[] = []
-	public addArgument (path: string, type: string, optional = false) {
-		this.args.push({ path, type, optional })
+	public addArgument (path: string, type: string, optional = false, rest = false) {
+		if (this.args.at(-1)?.rest)
+			throw new Error("Cannot add argument after rest argument")
+
+		this.args.push({ path, type, optional, rest })
 		return this
 	}
 
