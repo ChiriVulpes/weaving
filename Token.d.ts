@@ -2,6 +2,7 @@ export interface IArgument {
     path: string;
     type: string;
     optional: boolean;
+    rest: boolean;
 }
 export declare namespace IArgument {
     function accessor(path: string): string;
@@ -30,7 +31,7 @@ declare class Token implements IToken {
     setCompiled(compiled: string, string?: string): this;
     setCompiled(compiled: IWeft | string, string: string): this;
     args: IArgument[];
-    addArgument(path: string, type: string, optional?: boolean): this;
+    addArgument(path: string, type: string, optional?: boolean, rest?: boolean): this;
     inheritArguments(optional: number, ...tokens: IToken[]): this;
     inheritArguments(...tokens: IToken[]): this;
 }

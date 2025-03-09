@@ -77,8 +77,10 @@
             return this;
         }
         args = [];
-        addArgument(path, type, optional = false) {
-            this.args.push({ path, type, optional });
+        addArgument(path, type, optional = false, rest = false) {
+            if (this.args.at(-1)?.rest)
+                throw new Error("Cannot add argument after rest argument");
+            this.args.push({ path, type, optional, rest });
             return this;
         }
         inheritArguments(optional, ...tokens) {

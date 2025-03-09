@@ -66,7 +66,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
             accessor = `(${accessor}?${whitespacedValue}:${orElseString})`;
         }
         return new Token_1.default()
-            .addArgument(argument, "WeavingArg", !!orElse)
+            .addArgument(argument, "WeavingArg", !!orElse, join && !argument)
             .setCompiled({ content: accessor }, Token_1.default.rawGenerator(accessor));
     }
     // internal warp for matching & inside a join warp
