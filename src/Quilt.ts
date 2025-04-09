@@ -4,14 +4,15 @@ import WarpConditional from "./warps/WarpConditional"
 import WarpTag from "./warps/WarpTag"
 import Weave from "./Weave"
 
-const UMD_HEADER = "(function(factory){if(typeof module===\"object\"&&typeof module.exports===\"object\"){var v=factory(require, exports);if(v!==undefined)module.exports=v}else if(typeof define===\"function\"&&define.amd){define([\"require\",\"exports\"],factory);}})(function(require,exports){\"use strict\";Object.defineProperty(exports,\"__esModule\",{value:true});let r=Symbol();exports.WeavingArg={setRenderable:t=>(t[r]=true,t),isRenderable:t=>!!t[r]};"
+const UMD_HEADER = "(function(factory){if(typeof module===\"object\"&&typeof module.exports===\"object\"){var v=factory(require, exports);if(v!==undefined)module.exports=v}else if(typeof define===\"function\"&&define.amd){define([\"require\",\"exports\"],factory);}})(function(require,exports){\"use strict\";Object.defineProperty(exports,\"__esModule\",{value:true});let r=Symbol();let rts=Symbol();exports.WeavingArg={setRenderable:(t,ts)=>(t[r]=true,t[rts]=ts,t),isRenderable:t=>!!t[r]};"
 const UMD_FOOTER = "})"
 
 const FUNCTIONS = {
-	STRINGIFY: "let s=t=>typeof t==\"string\"?t:Array.isArray(t)?t.map(s).join(\"\"):typeof t!=\"object\"||t===null||!t.content?String(t):typeof t.content==\"object\"?s(t.content):String(t.content);",
+	STRINGIFY: "let s=t=>typeof t==\"string\"?t:Array.isArray(t)?t.map(s).join(\"\"):typeof t=='object'&&rts in t?t[rts]():typeof t!=\"object\"||t===null||!t.content?String(t):typeof t.content!=\"object\"?String(t.content):s(t.content);",
 	IS_ITERABLE: "let ii=u=>(typeof u==\"object\"||typeof u==\"function\")&&Symbol.iterator in u;",
 	CONTENT: "let c=c=>({content:c,toString(){return s(this.content)}});",
-	JOIN: "let j=(a,s,v)=>{a=(!a?[]:Array.isArray(a)?a:ii(a)?[...a]:[a]);return (v?a.map(v):a).flatMap((v,i)=>i<a.length-1?[].concat(v,s):v)};",
+	WEFT_ARG: "let w=a=>typeof a=='object'&&'content' in a?a:{content:a};",
+	JOIN: "let j=(a,s,v)=>{a=(!a?[]:Array.isArray(a)?a:ii(a)?[...a]:[a]);return (v?a.map(v):a).flatMap((v,i)=>i<a.length-1?[].concat(w(v),s):w(v))};",
 	LENGTH: "let l=v=>!v?0:typeof v.length==\"number\"?v.length:typeof v.size==\"number\"?v.size:ii(v)?[...v].length:typeof v==\"object\"?Object.keys(v).length:0;",
 }
 
@@ -27,14 +28,16 @@ export interface Weft {
 const QUILT_HEADER_POST_WEFT = `}
 
 declare const SYMBOL_WEAVING_RENDERABLE: unique symbol;
+declare const SYMBOL_WEAVING_RENDERABLE_TO_STRING: unique symbol;
 
 export interface WeavingRenderable {
 	[SYMBOL_WEAVING_RENDERABLE]: true
+	[SYMBOL_WEAVING_RENDERABLE_TO_STRING]?(): string
 }
 	
 export type WeavingArg = Weave | WeavingRenderable | string | number | undefined | null;
 export namespace WeavingArg {
-	export function setRenderable<T>(value: T): T & WeavingRenderable;
+	export function setRenderable<T>(value: T, toString?: () => string): T & WeavingRenderable;
 	export function isRenderable<T>(value: T): value is T & WeavingRenderable;
 }
 
