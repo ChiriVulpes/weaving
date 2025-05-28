@@ -65,8 +65,9 @@ var __importStar = (this && this.__importStar) || function (mod) {
                 : `[${whitespaceBefore && `{content:"${whitespaceBefore}"},`}${accessor}${whitespaceAfter && `,{content:"${whitespaceAfter}"}`}]`;
             accessor = `(${accessor}?${whitespacedValue}:${orElseString})`;
         }
+        const spread = join && !argument;
         return new Token_1.default()
-            .addArgument(argument, "WeavingArg", !!orElse, join && !argument)
+            .addArgument(argument, `WeavingArg${join && !spread ? "[]" : ""}`, !!orElse, spread)
             .setCompiled({ content: accessor }, Token_1.default.rawGenerator(accessor));
     }
     // internal warp for matching & inside a join warp
