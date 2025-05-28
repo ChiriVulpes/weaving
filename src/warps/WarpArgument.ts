@@ -40,8 +40,9 @@ export function tokeniseArgument (walker: StringWalker, match: Match, api: IWarp
 		accessor = `(${accessor}?${whitespacedValue}:${orElseString})`
 	}
 
+	const spread = join && !argument
 	return new Token()
-		.addArgument(argument, "WeavingArg", !!orElse, join && !argument)
+		.addArgument(argument, `WeavingArg${join && !spread ? "[]" : ""}`, !!orElse, spread)
 		.setCompiled({ content: accessor }, Token.rawGenerator(accessor))
 }
 
