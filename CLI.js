@@ -146,7 +146,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             if (argv.types)
                 quilt.definitions.pipe(fs_1.default.createWriteStream(dts, {
                     // TODO temp workaround for backpressure
-                    highWaterMark: 65536,
+                    highWaterMark: 262144,
                 }));
             const readStream = fs_1.default.createReadStream(file);
             const stream = readStream
