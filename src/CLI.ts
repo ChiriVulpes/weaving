@@ -154,7 +154,7 @@ async function compileFile (file: string) {
 		if (argv.types)
 			quilt.definitions.pipe(fs.createWriteStream(dts, {
 				// TODO temp workaround for backpressure
-				highWaterMark: 65536,
+				highWaterMark: 262144,
 			}))
 		const readStream = fs.createReadStream(file)
 		const stream = readStream
