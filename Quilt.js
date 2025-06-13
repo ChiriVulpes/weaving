@@ -130,6 +130,7 @@ export default quilt;
         level = -1;
         pendingEntry = "";
         nextEscaped = false;
+        pendingEscaped = "";
         pendingTranslation = "";
         pendingReference = "";
         pendingReferenceParameters = [];
@@ -147,6 +148,7 @@ export default quilt;
             let level = this.level;
             let pendingEntry = this.pendingEntry;
             let nextEscaped = this.nextEscaped;
+            let pendingEscaped = this.pendingEscaped;
             let pendingTranslation = this.pendingTranslation;
             let pendingReference = this.pendingTranslation;
             const pendingReferenceParameters = this.pendingReferenceParameters;
@@ -282,6 +284,33 @@ export default quilt;
                                 continue;
                         }
                     case 4 /* Mode.Translation */:
+                        if (nextEscaped && char === "x" || char === "u") {
+                            nextEscaped = false;
+                            pendingEscaped = char;
+                            continue;
+                        }
+                        if (pendingEscaped) {
+                            pendingEscaped += char;
+                            if (isNaN(parseInt(char, 16))) {
+                                // invalid hex
+                                pendingTranslation += pendingEscaped;
+                                pendingEscaped = "";
+                                continue;
+                            }
+                            if (pendingEscaped.length === 3 && pendingEscaped[0] === "x") {
+                                // \xXX
+                                pendingTranslation += String.fromCharCode(parseInt(pendingEscaped.slice(1), 16));
+                                pendingEscaped = "";
+                                continue;
+                            }
+                            if (pendingEscaped.length === 5 && pendingEscaped[0] === "u") {
+                                // \uXXXX
+                                pendingTranslation += String.fromCharCode(parseInt(pendingEscaped.slice(1), 16));
+                                pendingEscaped = "";
+                                continue;
+                            }
+                            continue;
+                        }
                         if (nextEscaped && char !== "\r") {
                             pendingTranslation += char === "n" ? "\n" : char;
                             nextEscaped = false;
