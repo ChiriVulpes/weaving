@@ -36,6 +36,15 @@
         get char() { return this.str[this.cursor]; }
         get nextChar() { return this.str[this.cursor + 1]; }
         get ended() { return this.cursor >= this.str.length; }
+        get line() {
+            return this.str.slice(0, this.cursor).split("\n").length;
+        }
+        get column() {
+            const lastNewline = this.str.lastIndexOf("\n", this.cursor);
+            return lastNewline === -1
+                ? this.cursor + 1
+                : this.cursor - lastNewline;
+        }
         constructor(str) {
             this.str = str;
         }
@@ -63,6 +72,30 @@
                 char = this.next();
             } while (char);
             return this;
+        }
+        walkUntilNot(substr) {
+            const start = this.cursor;
+            let char = this.char;
+            do {
+                if (char !== substr[0] || !this.isAtSubstr(substr))
+                    break;
+                this.walk(substr.length);
+                char = this.char;
+            } while (char);
+            return this.str.slice(start, this.cursor);
+        }
+        walkLine() {
+            const start = this.cursor;
+            let char = this.char;
+            do {
+                if (char === "\r" || char === "\n")
+                    break;
+                char = this.next();
+            } while (char);
+            return this.str.slice(start, this.cursor);
+        }
+        walkIndent() {
+            return this.walkUntilNot("\t");
         }
         walkWhitespace() {
             let whitespace = "";
@@ -207,6 +240,22 @@
             }
             return true;
         }
+        walkNewlines() {
+            const start = this.cursor;
+            do
+                if (this.char === "\r")
+                    this.next();
+            while (this.walkChar("\n"));
+            return this.cursor > start;
+        }
+        walkNewline() {
+            const start = this.cursor;
+            if (this.char === "\r")
+                this.next();
+            if (this.char === "\n")
+                this.next();
+            return this.cursor > start;
+        }
         walkChar(char) {
             if (this.char === char) {
                 this.next();
@@ -218,10 +267,10 @@
             for (const str of substr) {
                 if (this.hasNext(str)) {
                     this.cursor += str.length;
-                    return true;
+                    return str;
                 }
             }
-            return false;
+            return null;
         }
         clone() {
             return new StringWalker(this.str)

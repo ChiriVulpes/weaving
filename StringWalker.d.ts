@@ -4,12 +4,17 @@ export default class StringWalker {
     get char(): string | undefined;
     get nextChar(): string | undefined;
     get ended(): boolean;
+    get line(): number;
+    get column(): number;
     constructor(str: string);
     prev(): string | undefined;
     next(): string | undefined;
     walk(amount: number): this;
     walkTo(index: number): this;
     walkUntil(substr: string): this;
+    walkUntilNot(substr: string): string;
+    walkLine(): string;
+    walkIndent(): string;
     walkWhitespace(): string;
     walkArgument(): string | undefined;
     walkFloat(canHaveBigInt?: boolean): number | bigint | undefined;
@@ -21,8 +26,10 @@ export default class StringWalker {
     unsave(): this;
     restore(): this;
     hasNext(substr: string): boolean;
+    walkNewlines(): boolean;
+    walkNewline(): boolean;
     walkChar(char: string): boolean;
-    walkSubstr(...substr: string[]): boolean;
+    walkSubstr(...substr: string[]): string | null;
     clone(): StringWalker;
     isAtSubstr(substr: string): boolean;
 }

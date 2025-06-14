@@ -52,12 +52,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             compiled = compiled.slice(0, -1);
             let args = "";
             if (argTypes.length)
-                args = argTypes
+                args = [...argTypes]
                     .map((typeSet, i) => {
-                    if (typeSet.size > 1)
+                    if (typeSet && typeSet.size > 1)
                         // prevent `Explicit Types & any`
                         typeSet.delete("any");
-                    const type = [...typeSet].join(" & ");
+                    const type = !typeSet ? "any" : [...typeSet].join(" & ");
                     return `arg_${i}${lastRequiredIndex < i ? "?" : ""}: ${optionals[i] && lastRequiredIndex >= i ? `(${type}) | undefined` : type}`;
                 })
                     .join(", ");
@@ -65,7 +65,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 args += `${args ? ", " : ""}...args: WeavingArg[]`;
             return {
                 script: `${args ? "(...a)" : "_"}=>c([${compiled}])`,
-                definitions: `(${args}): Weave`,
+                definition: `(${args}): Weave`,
             };
         }
         static compileType(keys, type) {
@@ -79,6 +79,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             this.warps = warps;
         }
         tokenise(walker = new StringWalker_1.default(this.raw), until) {
+            if (!this.raw)
+                return [];
             const tokens = [];
             let token;
             const warps = this.buildWarpCache();
@@ -115,7 +117,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 const warpTokens = warp.tokenise?.(warpWalker, match, this);
                 if (!warpTokens)
                     continue;
-                if (!warpWalker.walkSubstr(...match.end) && !warpWalker.ended)
+                if (warpWalker.walkSubstr(...match.end) === null && !warpWalker.ended)
                     continue;
                 walker.walkTo(warpWalker.cursor);
                 return arrayOr(warpTokens);
