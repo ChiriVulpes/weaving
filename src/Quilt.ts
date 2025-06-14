@@ -1,4 +1,5 @@
 import * as fs from "fs/promises"
+import path from "path"
 import File from "./File"
 import StringWalker from "./StringWalker"
 import type Warp from "./Warp"
@@ -15,8 +16,14 @@ interface Quilt {
 }
 
 async function Quilt (file: string, options?: Quilt.Options, warps = Quilt.DEFAULT_WARPS): Promise<Quilt> {
+	if (!file.endsWith(".quilt"))
+		file += ".quilt"
+
 	file = File.relative(file)
-	const contents = await fs.readFile(file, "utf8")
+
+	const contents = await fs.readFile(file, "utf8").catch(() => null)
+	if (contents === null)
+		throw error(`Unable to read quilt file: ${file}`)
 
 	const quilt: Quilt = {
 		file,
@@ -45,6 +52,14 @@ async function Quilt (file: string, options?: Quilt.Options, warps = Quilt.DEFAU
 			if (walker.hasNext("- ")) {
 				// comment
 				walker.walkLine()
+				walker.walkNewlines()
+				continue
+			}
+
+			if (walker.walkChar("~")) {
+				const importFile = path.join(path.dirname(file), walker.walkLine())
+				const subThreads = await Quilt(importFile, options, warps)
+				Object.assign(threads, subThreads.threads)
 				walker.walkNewlines()
 				continue
 			}
