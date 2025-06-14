@@ -30,12 +30,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "fs/promises", "./File", "./StringWalker", "./warps/WarpArgument", "./warps/WarpConditional", "./warps/WarpTag", "./Weave"], factory);
+        define(["require", "exports", "fs/promises", "path", "./File", "./StringWalker", "./warps/WarpArgument", "./warps/WarpConditional", "./warps/WarpTag", "./Weave"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const fs = __importStar(require("fs/promises"));
+    const path_1 = __importDefault(require("path"));
     const File_1 = __importDefault(require("./File"));
     const StringWalker_1 = __importDefault(require("./StringWalker"));
     const WarpArgument_1 = __importDefault(require("./warps/WarpArgument"));
@@ -43,8 +44,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const WarpTag_1 = __importDefault(require("./warps/WarpTag"));
     const Weave_1 = __importDefault(require("./Weave"));
     async function Quilt(file, options, warps = Quilt.DEFAULT_WARPS) {
+        if (!file.endsWith(".quilt"))
+            file += ".quilt";
         file = File_1.default.relative(file);
-        const contents = await fs.readFile(file, "utf8");
+        const contents = await fs.readFile(file, "utf8").catch(() => null);
+        if (contents === null)
+            throw error(`Unable to read quilt file: ${file}`);
         const quilt = {
             file,
             contents,
@@ -66,6 +71,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 if (walker.hasNext("- ")) {
                     // comment
                     walker.walkLine();
+                    walker.walkNewlines();
+                    continue;
+                }
+                if (walker.walkChar("~")) {
+                    const importFile = path_1.default.join(path_1.default.dirname(file), walker.walkLine());
+                    const subThreads = await Quilt(importFile, options, warps);
+                    Object.assign(threads, subThreads.threads);
                     walker.walkNewlines();
                     continue;
                 }
