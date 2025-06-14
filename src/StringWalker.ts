@@ -30,6 +30,17 @@ export default class StringWalker {
 	public get nextChar (): string | undefined { return this.str[this.cursor + 1] }
 	public get ended () { return this.cursor >= this.str.length }
 
+	public get line (): number {
+		return this.str.slice(0, this.cursor).split("\n").length
+	}
+
+	public get column (): number {
+		const lastNewline = this.str.lastIndexOf("\n", this.cursor)
+		return lastNewline === -1
+			? this.cursor + 1
+			: this.cursor - lastNewline
+	}
+
 	public constructor (public readonly str: string) { }
 
 	public prev () {
@@ -62,6 +73,37 @@ export default class StringWalker {
 		} while (char)
 
 		return this
+	}
+
+	public walkUntilNot (substr: string) {
+		const start = this.cursor
+		let char = this.char
+		do {
+			if (char !== substr[0] || !this.isAtSubstr(substr))
+				break
+
+			this.walk(substr.length)
+			char = this.char
+		} while (char)
+
+		return this.str.slice(start, this.cursor)
+	}
+
+	public walkLine () {
+		const start = this.cursor
+		let char = this.char
+		do {
+			if (char === "\r" || char === "\n")
+				break
+
+			char = this.next()
+		} while (char)
+
+		return this.str.slice(start, this.cursor)
+	}
+
+	public walkIndent () {
+		return this.walkUntilNot("\t")
 	}
 
 	public walkWhitespace () {
@@ -235,6 +277,20 @@ export default class StringWalker {
 		return true
 	}
 
+	public walkNewlines () {
+		const start = this.cursor
+		do if (this.char === "\r") this.next()
+		while (this.walkChar("\n"))
+		return this.cursor > start
+	}
+
+	public walkNewline () {
+		const start = this.cursor
+		if (this.char === "\r") this.next()
+		if (this.char === "\n") this.next()
+		return this.cursor > start
+	}
+
 	public walkChar (char: string) {
 		if (this.char === char) {
 			this.next()
@@ -248,11 +304,11 @@ export default class StringWalker {
 		for (const str of substr) {
 			if (this.hasNext(str)) {
 				this.cursor += str.length
-				return true
+				return str
 			}
 		}
 
-		return false
+		return null
 	}
 
 	public clone () {

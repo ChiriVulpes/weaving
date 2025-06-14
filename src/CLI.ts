@@ -1,67 +1,12 @@
 #!/usr/bin/env node
 
-import type * as AnsicolorModule from "ansicolor"
-import type * as ChalkModule from "chalk"
 import chokidar from "chokidar"
-import fs from "fs"
 import path from "path"
 import yargs from "yargs"
 import { hideBin } from "yargs/helpers"
-import { QuiltError } from "./Quilt"
+import Colour from "./Colour"
+import File from "./File"
 import Weaving from "./Weaving"
-
-// #region fs/path
-namespace File {
-	export async function stat (file: string) {
-		return fs.promises.stat(file).catch(() => null)
-	}
-
-	export async function children (dir: string) {
-		return fs.promises.readdir(dir)
-			.then(files => files.map(file => path.resolve(dir, file)))
-			.catch(() => [])
-	}
-
-	export function relative (file: string) {
-		file = path.relative(process.cwd(), file)
-		return file.startsWith(".") ? file : `.${path.sep}${file}`
-	}
-}
-// #endregion
-
-// #region color
-let chalk: typeof ChalkModule | undefined
-let ansicolor: typeof AnsicolorModule | undefined
-try {
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-	chalk = require("chalk")
-	// eslint-disable-next-line no-empty
-} catch { }
-try {
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-	ansicolor = require("ansicolor")
-	// eslint-disable-next-line no-empty
-} catch { }
-
-function color (text: string, color: keyof typeof AnsicolorModule): string {
-	if (!chalk && !ansicolor)
-		return text
-
-	if (ansicolor)
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-		return (ansicolor as any)[color](text)
-
-	let c2 = color.startsWith("light") ? `${color.slice(5).toLowerCase()}Bright` : color
-
-	if (c2 === "darkGray") c2 = "blackBright"
-	if (c2 === "white") c2 = "whiteBright"
-	if (c2 === "grayBright") c2 = "white"
-
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-	return (chalk as any)[c2](text)
-}
-
-// #endregion
 
 const argv = yargs(hideBin(process.argv))
 	.alias("v", "version")
@@ -97,7 +42,7 @@ void compileFiles(files)
 		if (!argv.watch)
 			return
 
-		console.log(color("> ", "lightYellow"), color("Watching for changes...", "darkGray"))
+		console.log(Colour("> ", "lightYellow"), Colour("Watching for changes...", "darkGray"))
 		for (const listedFile of files)
 			chokidar.watch(listedFile, { ignoreInitial: true, disableGlobbing: true })
 				.on("all", (event, file) => {
@@ -123,7 +68,7 @@ async function compileFiles (files: string[], allowAddingExt = true) {
 
 		if (!stat) {
 			const relativeFile = File.relative(file)
-			console.log(color("X ", "lightRed"), color(`File ${color(relativeFile, "red")} does not exist`, "darkGray"))
+			console.log(Colour("X ", "lightRed"), Colour(`File ${Colour(relativeFile, "red")} does not exist`, "darkGray"))
 			continue
 		}
 
@@ -141,51 +86,11 @@ async function compileFile (file: string) {
 		return
 
 	const relativeFile = File.relative(file)
-
-	const basename = relativeFile.slice(0, -6)
-	const dts = path.resolve(process.cwd(), argv.outTypes ?? argv.out ?? "", `${basename}.d.ts`)
-	const js = path.resolve(process.cwd(), argv.out ?? "", `${basename}.js`)
-
-	await fs.promises.mkdir(path.dirname(js), { recursive: true })
-	await fs.promises.mkdir(path.dirname(dts), { recursive: true })
-
-	return new Promise<void>(resolve => {
-		const quilt = Weaving.createQuiltTransformer({ whitespace: argv.outWhitespace || undefined })
-		if (argv.types)
-			quilt.definitions.pipe(fs.createWriteStream(dts, {
-				// TODO temp workaround for backpressure
-				highWaterMark: 262144,
-			}))
-		const readStream = fs.createReadStream(file)
-		const stream = readStream
-			.pipe(quilt)
-			.pipe(fs.createWriteStream(js))
-
-		quilt.on("error", (err) => {
-			let message: string
-			const errorMessage = argv.verbose ? err.stack?.slice(7).replace(/\n/g, "\n   ") ?? "" : err.message
-			if (err instanceof QuiltError) {
-				const errorPosition = `${relativeFile}${err.line === undefined ? "" : `:${err.line}${err.column === undefined ? "" : `:${err.column}`}`}`
-				message = `Compilation error at ${color(errorPosition, "red")}: ${errorMessage}`
-			} else {
-				message = `Failed to compile ${color(relativeFile, "red")}: ${errorMessage}`
-			}
-
-			// eslint-disable-next-line @typescript-eslint/restrict-template-expressions, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-			console.log(color("X ", "lightRed"), color(message, "darkGray"))
-			readStream.close()
-			resolve()
-		})
-
-		stream.on("finish", () => {
-			let files = [js]
-			if (argv.types)
-				files.push(dts)
-			files = files.map(file => color(File.relative(file), "lightGreen"))
-
-			console.log(color("✓ ", "lightGreen"), color(`Compiled ${color(relativeFile, "lightGreen")} => ${files.join(", ")}`, "darkGray"))
-			readStream.close()
-			resolve()
-		})
+	await Weaving.quilt(relativeFile, {
+		out: argv.out,
+		outTypes: argv.outTypes,
+		types: argv.types ? true : undefined,
+		verbose: argv.verbose ? true : undefined,
+		whitespace: argv.outWhitespace ? true : undefined,
 	})
 }

@@ -4,13 +4,18 @@ import Token from "./Token"
 import type Warp from "./Warp"
 import type { IWarpAPI, Match } from "./Warp"
 
+export interface Thread {
+	script: string
+	definition: string
+}
+
 export default class Weave implements IWarpAPI {
 
-	public static compile (source: string, warps: Warp[]) {
+	public static compile (source: string, warps: Warp[]): Thread {
 		return Weave.compileTokens(...new Weave(source, warps).tokenise())
 	}
 
-	private static compileTokens (...tokens: IToken[]) {
+	private static compileTokens (...tokens: IToken[]): Thread {
 		let compiled = ""
 		const argTypes: Set<string>[] = []
 		let lastRequiredIndex = -1
@@ -53,13 +58,13 @@ export default class Weave implements IWarpAPI {
 
 		let args = ""
 		if (argTypes.length)
-			args = argTypes
+			args = [...argTypes]
 				.map((typeSet, i) => {
-					if (typeSet.size > 1)
+					if (typeSet && typeSet.size > 1)
 						// prevent `Explicit Types & any`
 						typeSet.delete("any")
 
-					const type = [...typeSet].join(" & ")
+					const type = !typeSet ? "any" : [...typeSet].join(" & ")
 					return `arg_${i}${lastRequiredIndex < i ? "?" : ""}: ${optionals[i] && lastRequiredIndex >= i ? `(${type}) | undefined` : type}`
 				})
 				.join(", ")
@@ -69,7 +74,7 @@ export default class Weave implements IWarpAPI {
 
 		return {
 			script: `${args ? "(...a)" : "_"}=>c([${compiled}])`,
-			definitions: `(${args}): Weave`,
+			definition: `(${args}): Weave`,
 		}
 	}
 
@@ -84,6 +89,9 @@ export default class Weave implements IWarpAPI {
 	}
 
 	public tokenise (walker = new StringWalker(this.raw), until?: string[]) {
+		if (!this.raw)
+			return []
+
 		const tokens: IToken[] = []
 		let token: IToken | undefined
 		const warps = this.buildWarpCache()
@@ -129,7 +137,7 @@ export default class Weave implements IWarpAPI {
 			if (!warpTokens)
 				continue
 
-			if (!warpWalker.walkSubstr(...match.end) && !warpWalker.ended)
+			if (warpWalker.walkSubstr(...match.end) === null && !warpWalker.ended)
 				continue
 
 			walker.walkTo(warpWalker.cursor)
