@@ -1,3 +1,4 @@
+import type { FSWatcher } from "chokidar";
 import type Warp from "./Warp";
 import type { Thread } from "./Weave";
 import Weave from "./Weave";
@@ -13,6 +14,7 @@ declare namespace Quilt {
         /** Replace the default weaving function with an edited implementation. The default implementation resides in `Weave.compile` */
         weave?: typeof Weave.compile;
         whitespace?: true;
+        watcher?: FSWatcher;
     }
     const DEFAULT_WARPS: Warp[];
     class Error extends BaseError {

@@ -43,20 +43,22 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     }
     files = resolveFiles(files);
     excludedFiles = resolveFiles(excludedFiles);
-    void compileFiles(files)
+    const watcher = !argv.watch ? undefined
+        : chokidar_1.default.watch([], { ignoreInitial: true, disableGlobbing: true })
+            .on("all", (event, file) => {
+            if (event === "unlink" || event === "unlinkDir")
+                return;
+            void compileFiles(files, false, watcher);
+        });
+    void compileFiles(files, undefined, watcher)
         .then(() => {
-        if (!argv.watch)
+        if (!watcher)
             return;
         console.log((0, Colour_1.default)("> ", "lightYellow"), (0, Colour_1.default)("Watching for changes...", "darkGray"));
         for (const listedFile of files)
-            chokidar_1.default.watch(listedFile, { ignoreInitial: true, disableGlobbing: true })
-                .on("all", (event, file) => {
-                if (event === "unlink" || event === "unlinkDir")
-                    return;
-                void compileFiles([file], false);
-            });
+            watcher.add(listedFile);
     });
-    async function compileFiles(files, allowAddingExt = true) {
+    async function compileFiles(files, allowAddingExt = true, watcher) {
         NextFile: for (let file of files) {
             for (const excludedFile of excludedFiles)
                 if (file.startsWith(excludedFile))
@@ -77,10 +79,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 await compileFiles(await File_1.default.children(file), false);
                 continue;
             }
-            await compileFile(file);
+            await compileFile(file, watcher);
         }
     }
-    async function compileFile(file) {
+    async function compileFile(file, watcher) {
         if (!file.endsWith(".quilt"))
             return;
         const relativeFile = File_1.default.relative(file);
@@ -90,6 +92,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             types: argv.types ? true : undefined,
             verbose: argv.verbose ? true : undefined,
             whitespace: argv.outWhitespace ? true : undefined,
+            watcher,
         });
     }
 });

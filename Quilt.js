@@ -47,6 +47,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (!file.endsWith(".quilt"))
             file += ".quilt";
         file = File_1.default.relative(file);
+        options?.watcher?.add(file);
         const contents = await fs.readFile(file, "utf8").catch(() => null);
         if (contents === null)
             throw error(`Unable to read quilt file: ${file}`);
