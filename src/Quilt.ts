@@ -1,3 +1,4 @@
+import type { FSWatcher } from "chokidar"
 import * as fs from "fs/promises"
 import path from "path"
 import File from "./File"
@@ -20,6 +21,7 @@ async function Quilt (file: string, options?: Quilt.Options, warps = Quilt.DEFAU
 		file += ".quilt"
 
 	file = File.relative(file)
+	options?.watcher?.add(file)
 
 	const contents = await fs.readFile(file, "utf8").catch(() => null)
 	if (contents === null)
@@ -263,6 +265,7 @@ namespace Quilt {
 		/** Replace the default weaving function with an edited implementation. The default implementation resides in `Weave.compile` */
 		weave?: typeof Weave.compile
 		whitespace?: true
+		watcher?: FSWatcher
 	}
 	export const DEFAULT_WARPS: Warp[] = [
 		WarpTag,

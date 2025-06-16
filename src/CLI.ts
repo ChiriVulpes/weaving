@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import type { FSWatcher } from "chokidar"
 import chokidar from "chokidar"
 import path from "path"
 import yargs from "yargs"
@@ -37,23 +38,26 @@ function resolveFiles (files: string[]) {
 files = resolveFiles(files)
 excludedFiles = resolveFiles(excludedFiles)
 
-void compileFiles(files)
+const watcher = !argv.watch ? undefined
+	: chokidar.watch([], { ignoreInitial: true, disableGlobbing: true })
+		.on("all", (event, file) => {
+			if (event === "unlink" || event === "unlinkDir")
+				return
+
+			void compileFiles(files, false, watcher)
+		})
+
+void compileFiles(files, undefined, watcher)
 	.then(() => {
-		if (!argv.watch)
+		if (!watcher)
 			return
 
 		console.log(Colour("> ", "lightYellow"), Colour("Watching for changes...", "darkGray"))
 		for (const listedFile of files)
-			chokidar.watch(listedFile, { ignoreInitial: true, disableGlobbing: true })
-				.on("all", (event, file) => {
-					if (event === "unlink" || event === "unlinkDir")
-						return
-
-					void compileFiles([file], false)
-				})
+			watcher.add(listedFile)
 	})
 
-async function compileFiles (files: string[], allowAddingExt = true) {
+async function compileFiles (files: string[], allowAddingExt = true, watcher?: FSWatcher) {
 	NextFile: for (let file of files) {
 		for (const excludedFile of excludedFiles)
 			if (file.startsWith(excludedFile))
@@ -77,11 +81,11 @@ async function compileFiles (files: string[], allowAddingExt = true) {
 			continue
 		}
 
-		await compileFile(file)
+		await compileFile(file, watcher)
 	}
 }
 
-async function compileFile (file: string) {
+async function compileFile (file: string, watcher?: FSWatcher) {
 	if (!file.endsWith(".quilt"))
 		return
 
@@ -92,5 +96,6 @@ async function compileFile (file: string) {
 		types: argv.types ? true : undefined,
 		verbose: argv.verbose ? true : undefined,
 		whitespace: argv.outWhitespace ? true : undefined,
+		watcher,
 	})
 }
