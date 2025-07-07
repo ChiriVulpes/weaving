@@ -1,9 +1,8 @@
-import { spawn } from "child_process"
 import fs from "fs/promises"
+import { Task } from "task"
 import type packagejson from "../package.json"
-import Task from "./utilities/Task"
 
-export default Task("meta", async () => {
+export default Task("meta", async task => {
 	await fs.mkdir("build", { recursive: true })
 
 	const packageJson = JSON.parse(await fs.readFile("package.json", "utf8")) as Partial<typeof packagejson>
@@ -20,13 +19,8 @@ export default Task("meta", async () => {
 		node_modules/
 	`.split("\n").map(path => path.trim()).filter(path => path).join("\n") + "\n")
 
-	await new Promise<void>((resolve, reject) => {
-		const ext = process.platform === "win32" ? ".cmd" : ""
-		const childProcess = spawn("npm" + ext, ["install"], { cwd: "build", stdio: [process.stdin, process.stdout, process.stderr] })
-		childProcess.on("error", reject)
-		childProcess.on("exit", code => {
-			if (code === 1) reject("Error code 1")
-			else resolve()
-		})
-	})
+	const ocwd = process.cwd()
+	process.chdir("build")
+	await task.exec("NPM:PATH:npm", "install")
+	process.chdir(ocwd)
 })

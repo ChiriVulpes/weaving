@@ -1,6 +1,6 @@
 import { spawn } from "child_process"
 import path from "path"
-import Task from "./utilities/Task"
+import { Task } from "task"
 
 export default Task("build", () => new Promise<void>((resolve, reject) => {
 	process.chdir("src")

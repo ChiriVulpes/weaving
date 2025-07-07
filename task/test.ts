@@ -1,6 +1,6 @@
 import { spawn } from "child_process"
 import path from "path"
-import Task from "./utilities/Task"
+import { Task } from "task"
 
 export default Task("test", () => new Promise<void>((resolve, reject) => {
 	const ext = process.platform === "win32" ? ".cmd" : ""

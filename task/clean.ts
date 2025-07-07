@@ -1,4 +1,4 @@
 import del from "del"
-import Task from "./utilities/Task"
+import { Task } from "task"
 
 export default Task("clean", () => del("build"))
