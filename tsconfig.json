@@ -8,7 +8,6 @@
 		"resolveJsonModule": true,
 		"experimentalDecorators": true,
 		"skipLibCheck": true,
-		"noCheck": true,
 		"paths": {
 		}
 	},
