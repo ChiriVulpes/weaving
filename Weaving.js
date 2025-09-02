@@ -48,7 +48,7 @@ export interface WeavingRenderable {
 	[SYMBOL_WEAVING_RENDERABLE_TO_STRING]?(): string
 }
 	
-export type WeavingArg = Weave | WeavingRenderable | string | number | undefined | null
+export type WeavingArg = Weave | Weft | WeavingRenderable | string | number | undefined | null
 export namespace WeavingArg {
 	export function setRenderable<T>(value: T, toString?: () => string): T & WeavingRenderable
 	export function isRenderable<T>(value: T): value is T & WeavingRenderable
