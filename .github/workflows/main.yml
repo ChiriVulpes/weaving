@@ -25,7 +25,10 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install
+        run: |
+          pnpm unlink task
+          pnpm unlink lint
+          pnpm install
         
       - name: Build
         run: pnpm run build
