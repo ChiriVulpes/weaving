@@ -1,11 +1,11 @@
-import { Task } from "task";
+import { Task } from 'task'
 
-export default Task("install", async (task) => task.install(
+export default Task('install', async task => task.install(
 	{
-		path: ".",
-		dependencies: {
-			task: { repo: "chirivulpes/task", branch: "package" },
-			lint: { repo: "fluff4me/lint" },
+		path: '.',
+		devDependencies: {
+			task: { repo: 'chirivulpes/task', branch: 'package' },
+			lint: { repo: 'fluff4me/lint' },
 		},
 	}
 ))
