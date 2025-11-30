@@ -39,7 +39,7 @@
 		"even-more-min": "1.0.1",
 		"lint": "github:fluff4me/lint#46612b5672c7d1a82a663949eea64e8058a308a3",
 		"mocha": "11.7.5",
-		"task": "github:chirivulpes/task#7f24d8cff0e18a887219d7b16c771b33c3622b72",
+		"task": "github:chirivulpes/task#e81c106500da010fa22ad15fb7ca311786e550f1",
 		"ts-node": "10.9.2",
 		"typescript": "5.9.3"
 	},
