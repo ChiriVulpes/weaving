@@ -14,14 +14,21 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      
       - name: Setup Node.js environment
         uses: actions/setup-node@v2.4.0
+        with:
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: npm install
+        run: pnpm install
         
       - name: Build
-        run: npm run build
+        run: pnpm run build
       
       - name: Deploy
         uses: s0/git-publish-subdir-action@v2.5.1

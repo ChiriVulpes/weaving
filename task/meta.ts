@@ -9,7 +9,7 @@ export default Task("meta", async task => {
 	delete packageJson.private
 	delete packageJson.scripts
 	delete packageJson.devDependencies
-	delete packageJson.overrides
+	delete packageJson.pnpm
 	await fs.writeFile("build/package.json", JSON.stringify(packageJson, null, "\t"))
 
 	await fs.copyFile("LICENSE", "build/LICENSE")
@@ -21,6 +21,6 @@ export default Task("meta", async task => {
 
 	const ocwd = process.cwd()
 	process.chdir("build")
-	await task.exec("NPM:PATH:npm", "install")
+	await task.exec("NPM:PATH:pnpm", "install")
 	process.chdir(ocwd)
 })

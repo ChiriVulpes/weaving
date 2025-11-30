@@ -14,45 +14,39 @@
 		"url": "https://github.com/ChiriVulpes/weaving"
 	},
 	"scripts": {
-		"build": "npx task clean meta build",
-		"test": "npx task test",
-		"watch": "npx task clean meta watch",
-		"clean": "npx task clean"
+		"build": "pnpm exec task clean meta build",
+		"test": "pnpm exec task test",
+		"watch": "pnpm exec task clean meta watch",
+		"clean": "pnpm exec task clean"
 	},
 	"dependencies": {
-		"yargs": "17.7.2",
-		"chokidar": "3.6.0"
+		"chokidar": "3.6.0",
+		"yargs": "17.7.2"
 	},
 	"devDependencies": {
-		"@types/yargs": "17.0.33",
+		"@types/chai": "4.3.17",
+		"@types/chai-as-promised": "7.1.8",
 		"@types/del": "4.0.0",
+		"@types/mocha": "10.0.7",
 		"@types/node": "^22.7.4",
 		"@types/vinyl": "2.0.12",
-		"mocha": "10.7.3",
+		"@types/yargs": "17.0.33",
+		"ansicolor": "1.1.100",
 		"chai": "4.5.0",
 		"chai-as-promised": "7.1.2",
-		"@types/chai": "4.3.17",
-		"@types/mocha": "10.0.7",
-		"@types/chai-as-promised": "7.1.8",
 		"chalk": "4.1.0",
-		"even-more-min": "1.0.1",
-		"typescript": "5.8.3",
-		"ts-node": "10.9.2",
-		"ansicolor": "1.1.100",
-		"eslint": "8.52.0",
-		"@types/eslint": "8.44.6",
-		"@typescript-eslint/eslint-plugin": "6.9.0",
-		"@typescript-eslint/parser": "6.9.0",
-		"eslint-plugin-only-warn": "1.0.3",
 		"del": "6.1.1",
-		"task": "github:chirivulpes/task#package"
+		"even-more-min": "1.0.1",
+		"lint": "github:fluff4me/lint",
+		"mocha": "11.7.5",
+		"task": "github:chirivulpes/task#package",
+		"ts-node": "10.9.2",
+		"typescript": "5.9.3"
 	},
-	"overrides": {
-		"ts-node": {
-			"typescript": "$typescript"
-		},
-		"even-more-min": {
-			"mocha": "$mocha"
+	"pnpm": {
+		"overrides": {
+			"lint": "link:../lint",
+			"task": "link:../task/out"
 		}
 	}
 }
