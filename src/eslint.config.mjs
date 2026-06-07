@@ -1,3 +1,5 @@
 import { lint } from '../eslint.config.mjs'
 
-export default lint(import.meta.dirname)
+export default lint(import.meta.dirname, {
+	allowDefaultProject: ['*.mjs'],
+})

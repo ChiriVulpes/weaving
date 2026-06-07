@@ -7,6 +7,7 @@ import Weaving from '../build/Weaving'
 chai.use(chaiAsPromised)
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const expect = chai.expect
 
 // async function sleep<T>(ms: number, returnValue?: T) {
@@ -15,7 +16,7 @@ const expect = chai.expect
 
 fs.rmSync('temp', { recursive: true, force: true })
 try { fs.mkdirSync('temp') }
- catch { }
+catch { }
 
 void (async () => {
 	try {
@@ -23,17 +24,17 @@ void (async () => {
 		if (!compiled)
 			return
 	}
- catch (err) {
+	catch (err) {
 		throw err instanceof Error ? err : new Error('Failed to compile quilt', { cause: err })
 	}
 
 	try {
 		let quilt: Record<string, (...args: any[]) => any> | undefined
 		try {
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-require-imports
 			quilt = require('./temp/test.js').default
 		}
- catch { }
+		catch { }
 
 		if (!quilt)
 			throw new Error('Quilt js file not found')
@@ -57,7 +58,7 @@ void (async () => {
 			console.log(key, inspect(result.content, undefined, Infinity, true), inspect(result.toString(), undefined, undefined, true))
 		}
 	}
- catch (err) {
+	catch (err) {
 		throw err instanceof Error ? err : new Error('Failed to execute quilt', { cause: err })
 	}
 })().catch(err => {

@@ -96,10 +96,10 @@ namespace Weaving {
 				const errorPosition = `${file}${err.line === undefined ? '' : `:${err.line}${err.column === undefined ? '' : `:${err.column}`}`}`
 				message = `Compilation error at ${Colour(errorPosition, 'red')}: ${errorMessage}`
 			}
- else {
+			else {
 				message = `Failed to compile ${Colour(relativeFile, 'red')}: ${errorMessage}`
 			}
-			 
+
 			console.log(Colour('X ', 'lightRed'), Colour(message, 'darkGray'))
 			return false
 		}

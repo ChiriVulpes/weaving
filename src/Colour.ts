@@ -4,12 +4,12 @@ import type * as ChalkModule from 'chalk'
 let chalk: typeof ChalkModule | undefined
 let ansicolor: typeof AnsicolorModule | undefined
 try {
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+	// eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-unsafe-assignment
 	chalk = require('chalk')
 }
  catch { }
 try {
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+	// eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-unsafe-assignment
 	ansicolor = require('ansicolor')
 }
  catch { }

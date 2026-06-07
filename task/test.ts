@@ -1,4 +1,4 @@
-import { spawn } from 'child_process'
+import { type ChildProcess, spawn } from 'child_process'
 import path from 'path'
 import { Task } from 'task'
 
@@ -7,7 +7,7 @@ export default Task('test', () => new Promise<void>((resolve, reject) => {
 	const mochaPath = path.resolve('node_modules/.bin/mocha' + ext)
 	process.chdir('tests')
 
-	const childProcess = spawn(
+	const childProcess: ChildProcess = spawn(
 		mochaPath,
 		[
 			'*.ts',
@@ -17,7 +17,7 @@ export default Task('test', () => new Promise<void>((resolve, reject) => {
 		{ stdio: [process.stdin, process.stdout, process.stderr] })
 	childProcess.on('error', reject)
 	childProcess.on('exit', code => {
-		if (code === 1) reject('Error code 1')
+		if (code === 1) reject(new Error('Error code 1'))
 		else resolve()
 	})
 

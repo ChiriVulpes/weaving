@@ -11,7 +11,7 @@ function isWordChar (n: number) {
 	return (n >= 65 && n < 91) // uppercase
 		|| (n >= 97 && n < 123) // lowercase
 		|| n === 95 // _
-		|| n >= 48 && n < 58 // numbers
+		|| (n >= 48 && n < 58) // numbers
 }
 
 function isDigit (n: number, base: number) {
