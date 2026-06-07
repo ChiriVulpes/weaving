@@ -28,7 +28,7 @@
 		"@types/chai-as-promised": "7.1.8",
 		"@types/del": "4.0.0",
 		"@types/mocha": "10.0.7",
-		"@types/node": "^22.19.1",
+		"@types/node": "^22.19.19",
 		"@types/vinyl": "2.0.12",
 		"@types/yargs": "17.0.33",
 		"ansicolor": "1.1.100",
@@ -37,15 +37,18 @@
 		"chalk": "4.1.0",
 		"del": "6.1.1",
 		"even-more-min": "1.0.1",
-		"lint": "github:fluff4me/lint#46612b5672c7d1a82a663949eea64e8058a308a3",
+		"lint": "github:fluff4me/lint#3d03a983ff334c89bf2d9d55555453860404bfc8",
 		"mocha": "11.7.5",
-		"task": "github:chirivulpes/task#e81c106500da010fa22ad15fb7ca311786e550f1",
+		"task": "github:chirivulpes/task#4743b1177d35a1fa751de5fed6362e5d4e36ce0e",
 		"ts-node": "10.9.2",
 		"typescript": "5.9.3"
 	},
 	"pnpm": {
 		"overrides": {
-			"even-more-min>mocha": "11.7.5"
+			"even-more-min>mocha": "11.7.5",
+			"diff@>=6.0.0 <8.0.3": "^8.0.3",
+			"serialize-javascript@<=7.0.2": "^7.0.3",
+			"serialize-javascript@>=5.0.0 <7.0.5": "^7.0.5"
 		}
 	}
 }
