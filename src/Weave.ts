@@ -1,8 +1,8 @@
-import StringWalker from "./StringWalker"
-import type { IToken } from "./Token"
-import Token from "./Token"
-import type Warp from "./Warp"
-import type { IWarpAPI, Match } from "./Warp"
+import StringWalker from './StringWalker'
+import type { IToken } from './Token'
+import Token from './Token'
+import type Warp from './Warp'
+import type { IWarpAPI, Match } from './Warp'
 
 export interface Thread {
 	script: string
@@ -16,7 +16,7 @@ export default class Weave implements IWarpAPI {
 	}
 
 	private static compileTokens (...tokens: IToken[]): Thread {
-		let compiled = ""
+		let compiled = ''
 		const argTypes: Set<string>[] = []
 		let lastRequiredIndex = -1
 		const optionals: boolean[] = []
@@ -34,12 +34,12 @@ export default class Weave implements IWarpAPI {
 					break
 				}
 
-				const keys = path.split(".")
+				const keys = path.split('.')
 				if (keys.length === 0)
 					continue
 
 				if (isNaN(+keys[0]))
-					keys.unshift("0")
+					keys.unshift('0')
 
 				const generatedType = this.compileType(keys.slice(1), type)
 
@@ -56,24 +56,24 @@ export default class Weave implements IWarpAPI {
 
 		compiled = compiled.slice(0, -1)
 
-		let args = ""
+		let args = ''
 		if (argTypes.length)
 			args = [...argTypes]
 				.map((typeSet, i) => {
 					if (typeSet && typeSet.size > 1)
 						// prevent `Explicit Types & any`
-						typeSet.delete("any")
+						typeSet.delete('any')
 
-					const type = !typeSet ? "any" : [...typeSet].join(" & ")
-					return `arg_${i}${lastRequiredIndex < i ? "?" : ""}: ${optionals[i] && lastRequiredIndex >= i ? `(${type}) | undefined` : type}`
+					const type = !typeSet ? 'any' : [...typeSet].join(' & ')
+					return `arg_${i}${lastRequiredIndex < i ? '?' : ''}: ${optionals[i] && lastRequiredIndex >= i ? `(${type}) | undefined` : type}`
 				})
-				.join(", ")
+				.join(', ')
 
 		if (hasRest)
-			args += `${args ? ", " : ""}...args: WeavingArg[]`
+			args += `${args ? ', ' : ''}...args: WeavingArg[]`
 
 		return {
-			script: `${args ? "(...a)" : "_"}=>c([${compiled}])`,
+			script: `${args ? '(...a)' : '_'}=>c([${compiled}])`,
 			definition: `(${args}): Weave`,
 		}
 	}
@@ -171,6 +171,7 @@ export default class Weave implements IWarpAPI {
 
 		return this.warpCache = cache
 	}
+
 }
 
 function arrayOr<T> (val: T | T[]) {

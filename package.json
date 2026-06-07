@@ -37,7 +37,7 @@
 		"chalk": "4.1.0",
 		"del": "6.1.1",
 		"even-more-min": "1.0.1",
-		"lint": "github:fluff4me/lint#3d03a983ff334c89bf2d9d55555453860404bfc8",
+		"lint": "github:fluff4me/lint#59de9b26041d6b98921a8a158ea5c29fdc699297",
 		"mocha": "11.7.5",
 		"task": "github:chirivulpes/task#4743b1177d35a1fa751de5fed6362e5d4e36ce0e",
 		"ts-node": "10.9.2",

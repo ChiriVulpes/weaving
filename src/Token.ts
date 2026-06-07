@@ -8,16 +8,16 @@ export interface IArgument {
 export namespace IArgument {
 	const REGEX_WORD = /^\w+$/
 	export function accessor (path: string) {
-		const valueMode = path.startsWith("&")
+		const valueMode = path.startsWith('&')
 		if (valueMode)
 			path = path.slice(1)
 
-		const length = path.endsWith("..")
+		const length = path.endsWith('..')
 		if (length)
 			path = path.slice(0, -2)
 
 		let argumentPath = path.length === 0 ? []
-			: path.split(".")
+			: path.split('.')
 				.map(argument =>
 					// numeric key
 					!isNaN(parseInt(argument)) ? `[${argument}]`
@@ -26,18 +26,18 @@ export namespace IArgument {
 							// string key (invalid characters)
 							: `["${argument}"]`)
 
-		if (!valueMode && argumentPath.length && (argumentPath[0][0] !== "[" || argumentPath[0][1] === "\""))
-			argumentPath.unshift("[0]")
+		if (!valueMode && argumentPath.length && (argumentPath[0][0] !== '[' || argumentPath[0][1] === '"'))
+			argumentPath.unshift('[0]')
 
 		argumentPath = argumentPath.map((argument, i) => i || valueMode ? `?.${argument}` : argument)
 
-		argumentPath.unshift(valueMode ? "v" : "a")
-		const accessor = argumentPath.join("")
+		argumentPath.unshift(valueMode ? 'v' : 'a')
+		const accessor = argumentPath.join('')
 		return length ? `l(${accessor})` : accessor
 	}
 
 	export function index (path: string) {
-		const firstPeriod = path.indexOf(".")
+		const firstPeriod = path.indexOf('.')
 		const firstKey = firstPeriod === -1 ? path : path.slice(0, firstPeriod)
 		const firstIndex = parseInt(firstKey)
 		return isNaN(firstIndex) ? 0 : firstIndex
@@ -61,15 +61,15 @@ export interface IWeft {
 
 export namespace IWeft {
 	export function compile (weft: IWeft): string {
-		const content = typeof weft.content === "string" ? weft.content : `[${weft.content.map(token => token.compiled).join(",")}]`
-		return `{content:${content}${weft.details ? `,${JSON.stringify(weft.details)}` : ""}}`
+		const content = typeof weft.content === 'string' ? weft.content : `[${weft.content.map(token => token.compiled).join(',')}]`
+		return `{content:${content}${weft.details ? `,${JSON.stringify(weft.details)}` : ''}}`
 	}
 }
 
 class Token implements IToken {
 
 	public static compile (...tokens: IToken[]) {
-		return tokens.map(token => token.compiled ?? "\"\"").join(",")
+		return tokens.map(token => token.compiled ?? '""').join(',')
 	}
 
 	public static stringify (inner: true, ...tokens: IToken[]): string
@@ -77,7 +77,7 @@ class Token implements IToken {
 	public static stringify (inner: boolean | IToken, ...tokens: IToken[]) {
 		if (inner !== true)
 			tokens.unshift(inner as IToken), inner = false
-		return `${inner ? "" : "`"}${tokens.map(token => token.string ?? "").join("")}${inner ? "" : "`"}`
+		return `${inner ? '' : '`'}${tokens.map(token => token.string ?? '').join('')}${inner ? '' : '`'}`
 	}
 
 	public static rawGenerator (generator: string) {
@@ -89,7 +89,7 @@ class Token implements IToken {
 	public setCompiled (compiled: string, string?: string): this
 	public setCompiled (compiled: IWeft | string, string: string): this
 	public setCompiled (compiled: IWeft | string, string?: string) {
-		this.compiled = typeof compiled === "string" ? compiled : IWeft.compile(compiled)
+		this.compiled = typeof compiled === 'string' ? compiled : IWeft.compile(compiled)
 		this.string = string === undefined ? compiled as string : string
 		return this
 	}
@@ -97,7 +97,7 @@ class Token implements IToken {
 	public args: IArgument[] = []
 	public addArgument (path: string, type: string, optional = false, rest = false) {
 		if (this.args.at(-1)?.rest)
-			throw new Error("Cannot add argument after rest argument")
+			throw new Error('Cannot add argument after rest argument')
 
 		this.args.push({ path, type, optional, rest })
 		return this
@@ -106,7 +106,7 @@ class Token implements IToken {
 	public inheritArguments (optional: number, ...tokens: IToken[]): this
 	public inheritArguments (...tokens: IToken[]): this
 	public inheritArguments (optional: IToken | number, ...tokens: IToken[]) {
-		if (typeof optional !== "number")
+		if (typeof optional !== 'number')
 			tokens.unshift(optional), optional = -1
 
 		for (const token of tokens)
@@ -120,12 +120,13 @@ class Token implements IToken {
 	// public require (fn: string) {
 
 	// }
+
 }
 
 namespace Token {
 	export class Text implements IToken {
 
-		public text = ""
+		public text = ''
 		public get compiled () {
 			return `{content:${JSON.stringify(this.text)}}`
 		}
@@ -133,7 +134,8 @@ namespace Token {
 		public get string () {
 			return this.text
 		}
-	}
+	
+}
 }
 
 export default Token

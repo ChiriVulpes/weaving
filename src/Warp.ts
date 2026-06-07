@@ -1,5 +1,5 @@
-import type StringWalker from "./StringWalker"
-import type { IToken } from "./Token"
+import type StringWalker from './StringWalker'
+import type { IToken } from './Token'
 
 export interface IWarpAPI {
 	tokenise (walker: StringWalker, until?: string[]): IToken[]
@@ -32,12 +32,13 @@ export default class Warp {
 		this._weftProperties.push([property, type])
 		return this
 	}
+
 }
 
 export class Match {
 
-	public static BASIC_START = "{"
-	public static BASIC_END = "}"
+	public static BASIC_START = '{'
+	public static BASIC_END = '}'
 	public static readonly BASIC = new Match()
 
 	public constructor ()
@@ -78,4 +79,5 @@ export class Match {
 			.setStart(...this.start)
 			.setEnd(...this.end)
 	}
+
 }

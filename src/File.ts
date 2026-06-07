@@ -1,5 +1,5 @@
-import fs from "fs"
-import path from "path"
+import fs from 'fs'
+import path from 'path'
 
 namespace File {
 	export async function stat (file: string) {
@@ -14,7 +14,7 @@ namespace File {
 
 	export function relative (file: string) {
 		file = path.relative(process.cwd(), file)
-		return file.startsWith(".") ? file : `.${path.sep}${file}`
+		return file.startsWith('.') ? file : `.${path.sep}${file}`
 	}
 }
 

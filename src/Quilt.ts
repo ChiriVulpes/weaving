@@ -1,14 +1,14 @@
-import type { FSWatcher } from "chokidar"
-import * as fs from "fs/promises"
-import path from "path"
-import File from "./File"
-import StringWalker from "./StringWalker"
-import type Warp from "./Warp"
-import WarpArgument from "./warps/WarpArgument"
-import WarpConditional from "./warps/WarpConditional"
-import WarpTag from "./warps/WarpTag"
-import type { Thread } from "./Weave"
-import Weave from "./Weave"
+import type { FSWatcher } from 'chokidar'
+import * as fs from 'fs/promises'
+import path from 'path'
+import File from './File'
+import StringWalker from './StringWalker'
+import type Warp from './Warp'
+import WarpArgument from './warps/WarpArgument'
+import WarpConditional from './warps/WarpConditional'
+import WarpTag from './warps/WarpTag'
+import type { Thread } from './Weave'
+import Weave from './Weave'
 
 interface Quilt {
 	file: string
@@ -17,13 +17,13 @@ interface Quilt {
 }
 
 async function Quilt (file: string, options?: Quilt.Options, warps = Quilt.DEFAULT_WARPS): Promise<Quilt> {
-	if (!file.endsWith(".quilt"))
-		file += ".quilt"
+	if (!file.endsWith('.quilt'))
+		file += '.quilt'
 
 	file = File.relative(file)
 	options?.watcher?.add(file)
 
-	const contents = await fs.readFile(file, "utf8").catch(() => null)
+	const contents = await fs.readFile(file, 'utf8').catch(() => null)
 	if (contents === null)
 		throw error(`Unable to read quilt file: ${file}`)
 
@@ -42,7 +42,7 @@ async function Quilt (file: string, options?: Quilt.Options, warps = Quilt.DEFAU
 		const threads: Record<string, Thread> = {}
 
 		while (!walker.ended) {
-			if (walker.hasNext("#")) {
+			if (walker.hasNext('#')) {
 				const section = await consumeSection()
 				if (!section)
 					break
@@ -51,14 +51,14 @@ async function Quilt (file: string, options?: Quilt.Options, warps = Quilt.DEFAU
 				continue
 			}
 
-			if (walker.hasNext("- ")) {
+			if (walker.hasNext('- ')) {
 				// comment
 				walker.walkLine()
 				walker.walkNewlines()
 				continue
 			}
 
-			if (walker.walkChar("~")) {
+			if (walker.walkChar('~')) {
 				const importFile = path.join(path.dirname(file), walker.walkLine())
 				const subThreads = await Quilt(importFile, options, warps)
 				Object.assign(threads, subThreads.threads)
@@ -76,14 +76,14 @@ async function Quilt (file: string, options?: Quilt.Options, warps = Quilt.DEFAU
 
 	function consumeThread (): Thread {
 		switch (walker.char) {
-			case ":": {
-				walker.walkChar(":") // Consume the colon
+			case ':': {
+				walker.walkChar(':') // Consume the colon
 				return consumeWeaveOpportunity()
 			}
-			case "=": {
-				walker.walkChar("=") // Consume the equals sign
+			case '=': {
+				walker.walkChar('=') // Consume the equals sign
 				const refThreadName = consumeThreadName()
-				if (walker.walkWhitespace() && walker.walkChar("|")) {
+				if (walker.walkWhitespace() && walker.walkChar('|')) {
 					// Reference with argument(s)
 					const argumentWeave = consumeWeaveOpportunity()
 					return {
@@ -101,7 +101,7 @@ async function Quilt (file: string, options?: Quilt.Options, warps = Quilt.DEFAU
 				}
 			}
 			default:
-				throw error("Expected ':' or '=' after thread name'")
+				throw error('Expected \':\' or \'=\' after thread name\'')
 		}
 	}
 
@@ -109,10 +109,10 @@ async function Quilt (file: string, options?: Quilt.Options, warps = Quilt.DEFAU
 		if (walker.walkNewlines())
 			return consumeMultilineWeave()
 
-		if (walker.walkChar(" "))
+		if (walker.walkChar(' '))
 			return consumeWeave()
 
-		throw error("Expected whitespace after thread name")
+		throw error('Expected whitespace after thread name')
 	}
 
 	function consumeWeave () {
@@ -122,10 +122,10 @@ async function Quilt (file: string, options?: Quilt.Options, warps = Quilt.DEFAU
 	}
 
 	function consumeMultilineWeave () {
-		let text = ""
-		while (walker.walkChar("\t")) {
+		let text = ''
+		while (walker.walkChar('\t')) {
 			const line = walker.walkLine()
-			text += line + "\n"
+			text += line + '\n'
 			walker.walkNewlines()
 		}
 
@@ -135,37 +135,37 @@ async function Quilt (file: string, options?: Quilt.Options, warps = Quilt.DEFAU
 	}
 
 	function processEscapeCharacters (text: string): string {
-		let result = ""
+		let result = ''
 		for (let i = 0; i < text.length; i++) {
 			const char = text[i]
-			if (char !== "\\") {
+			if (char !== '\\') {
 				result += char
 				continue
 			}
 
 			const nextChar = text[i + 1]
 			switch (nextChar) {
-				case "n":
-					result += "\n"
+				case 'n':
+					result += '\n'
 					i++
 					continue
-				case "t":
-					result += "\t"
+				case 't':
+					result += '\t'
 					i++
 					continue
-				case "\n":
+				case '\n':
 					// Skip the newline character
 					i++
 					continue
-				case "\\":
-					result += "\\"
+				case '\\':
+					result += '\\'
 					i++
 					continue
 
-				case "x": {
+				case 'x': {
 					const hex = text.slice(i + 2, i + 4)
 					if (hex.length !== 2)
-						throw error("Invalid hex escape sequence, expected 2 characters after \\x")
+						throw error('Invalid hex escape sequence, expected 2 characters after \\x')
 
 					const charCode = parseInt(hex, 16)
 					if (isNaN(charCode))
@@ -176,10 +176,10 @@ async function Quilt (file: string, options?: Quilt.Options, warps = Quilt.DEFAU
 					continue
 				}
 
-				case "u": {
+				case 'u': {
 					const hex = text.slice(i + 2, i + 6)
 					if (hex.length !== 4)
-						throw error("Invalid unicode escape sequence, expected 4 characters after \\u")
+						throw error('Invalid unicode escape sequence, expected 4 characters after \\u')
 
 					const charCode = parseInt(hex, 16)
 					if (isNaN(charCode))
@@ -201,7 +201,7 @@ async function Quilt (file: string, options?: Quilt.Options, warps = Quilt.DEFAU
 	async function consumeSection (): Promise<Record<string, Thread> | null> {
 		walker.save()
 		const levelBefore = currentLevel
-		const level = walker.walkUntilNot("#").length
+		const level = walker.walkUntilNot('#').length
 		if (level <= levelBefore) {
 			walker.restore()
 			return null
@@ -214,7 +214,7 @@ async function Quilt (file: string, options?: Quilt.Options, warps = Quilt.DEFAU
 		const name = consumeThreadName()
 
 		if (!walker.walkNewlines())
-			throw new Error("Expected newline after thread name")
+			throw new Error('Expected newline after thread name')
 
 		const threads = await consume()
 		currentLevel = levelBefore
@@ -240,14 +240,14 @@ async function Quilt (file: string, options?: Quilt.Options, warps = Quilt.DEFAU
 			if (!isValidChar) {
 				const name = walker.str.slice(walker.cursor, i)
 				if (!name)
-					throw error("Expected thread name")
+					throw error('Expected thread name')
 
 				walker.walkTo(i)
 				return name
 			}
 		}
 
-		throw error("Unexpected end of file")
+		throw error('Unexpected end of file')
 	}
 
 	function error (message: string) {
@@ -274,10 +274,12 @@ namespace Quilt {
 	]
 
 	export class Error extends BaseError {
+
 		public constructor (reason: string, public readonly line: number, public readonly column: number) {
 			super(reason)
 		}
-	}
+	
+}
 }
 
 export default Quilt

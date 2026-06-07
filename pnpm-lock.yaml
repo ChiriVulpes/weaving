@@ -61,8 +61,8 @@ importers:
         specifier: 1.0.1
         version: 1.0.1
       lint:
-        specifier: github:fluff4me/lint#3d03a983ff334c89bf2d9d55555453860404bfc8
-        version: https://codeload.github.com/fluff4me/lint/tar.gz/3d03a983ff334c89bf2d9d55555453860404bfc8(typescript@5.9.3)
+        specifier: github:fluff4me/lint#59de9b26041d6b98921a8a158ea5c29fdc699297
+        version: https://codeload.github.com/fluff4me/lint/tar.gz/59de9b26041d6b98921a8a158ea5c29fdc699297(typescript@5.9.3)
       mocha:
         specifier: 11.7.5
         version: 11.7.5
@@ -1120,8 +1120,8 @@ packages:
     resolution: {integrity: sha512-+bT2uH4E5LGE7h/n3evcS/sQlJXCpIp6ym8OWJ5eV6+67Dsql/LaaT7qJBAt2rzfoa/5QBGBhxDix1dMt2kQKQ==}
     engines: {node: '>= 0.8.0'}
 
-  lint@https://codeload.github.com/fluff4me/lint/tar.gz/3d03a983ff334c89bf2d9d55555453860404bfc8:
-    resolution: {tarball: https://codeload.github.com/fluff4me/lint/tar.gz/3d03a983ff334c89bf2d9d55555453860404bfc8}
+  lint@https://codeload.github.com/fluff4me/lint/tar.gz/59de9b26041d6b98921a8a158ea5c29fdc699297:
+    resolution: {tarball: https://codeload.github.com/fluff4me/lint/tar.gz/59de9b26041d6b98921a8a158ea5c29fdc699297}
     version: 0.0.0
     hasBin: true
 
@@ -2727,7 +2727,7 @@ snapshots:
       prelude-ls: 1.2.1
       type-check: 0.4.0
 
-  lint@https://codeload.github.com/fluff4me/lint/tar.gz/3d03a983ff334c89bf2d9d55555453860404bfc8(typescript@5.9.3):
+  lint@https://codeload.github.com/fluff4me/lint/tar.gz/59de9b26041d6b98921a8a158ea5c29fdc699297(typescript@5.9.3):
     dependencies:
       '@eslint/js': 9.39.1
       '@stylistic/eslint-plugin': 5.6.1(eslint@9.39.1)

@@ -31,11 +31,11 @@ export default class StringWalker {
 	public get ended () { return this.cursor >= this.str.length }
 
 	public get line (): number {
-		return this.str.slice(0, this.cursor).split("\n").length
+		return this.str.slice(0, this.cursor).split('\n').length
 	}
 
 	public get column (): number {
-		const lastNewline = this.str.lastIndexOf("\n", this.cursor)
+		const lastNewline = this.str.lastIndexOf('\n', this.cursor)
 		return lastNewline === -1
 			? this.cursor + 1
 			: this.cursor - lastNewline
@@ -93,7 +93,7 @@ export default class StringWalker {
 		const start = this.cursor
 		let char = this.char
 		do {
-			if (char === "\r" || char === "\n")
+			if (char === '\r' || char === '\n')
 				break
 
 			char = this.next()
@@ -103,14 +103,14 @@ export default class StringWalker {
 	}
 
 	public walkIndent () {
-		return this.walkUntilNot("\t")
+		return this.walkUntilNot('\t')
 	}
 
 	public walkWhitespace () {
-		let whitespace = ""
+		let whitespace = ''
 		let char = this.char
 		do {
-			if (char !== " " && char !== "\t" && char !== "\r" && char !== "\n")
+			if (char !== ' ' && char !== '\t' && char !== '\r' && char !== '\n')
 				break
 
 			whitespace += char
@@ -121,9 +121,9 @@ export default class StringWalker {
 	}
 
 	public walkArgument () {
-		let argument = ""
-		if (this.walkChar("&"))
-			argument += "&"
+		let argument = ''
+		if (this.walkChar('&'))
+			argument += '&'
 
 		let char = this.char
 		do {
@@ -140,10 +140,11 @@ export default class StringWalker {
 
 		this.save()
 		this.walkWhitespace()
-		if (this.walkSubstr("..")) {
+		if (this.walkSubstr('..')) {
 			this.unsave()
-			argument += ".."
-		} else {
+			argument += '..'
+		}
+ else {
 			this.restore()
 		}
 
@@ -159,15 +160,15 @@ export default class StringWalker {
 	}
 
 	private walkNumber (canHaveBigInt: boolean, canHaveFloat = true, canHaveExponent = true): number | bigint | undefined {
-		const negative = this.walkChar("-")
+		const negative = this.walkChar('-')
 		if (!negative)
-			this.walkChar("+")
+			this.walkChar('+')
 
 		let char = this.char
 		let code = char?.charCodeAt(0)
 		let base = 10
 
-		let parseable = negative ? "-" : ""
+		let parseable = negative ? '-' : ''
 		const canHaveBase = code === 48 /* 0 */
 		if (canHaveBase) {
 			char = this.nextChar, code = char?.charCodeAt(0)
@@ -208,12 +209,13 @@ export default class StringWalker {
 			if (exponent === undefined)
 				return integer
 
-			if (typeof integer === "bigint") {
-				if (typeof exponent !== "bigint")
+			if (typeof integer === 'bigint') {
+				if (typeof exponent !== 'bigint')
 					exponent = BigInt(exponent)
 				return integer ** exponent
-			} else {
-				if (typeof exponent === "bigint")
+			}
+ else {
+				if (typeof exponent === 'bigint')
 					integer = BigInt(integer)
 				return (integer as number) ** (exponent as number)
 			}
@@ -223,7 +225,7 @@ export default class StringWalker {
 	}
 
 	private walkDigits (base: number, char = this.char, code = char?.charCodeAt(0)) {
-		let digits = ""
+		let digits = ''
 		let canUnderscore = false
 		let nextIsDigit: boolean | undefined
 		do {
@@ -279,15 +281,15 @@ export default class StringWalker {
 
 	public walkNewlines () {
 		const start = this.cursor
-		do if (this.char === "\r") this.next()
-		while (this.walkChar("\n"))
+		do if (this.char === '\r') this.next()
+		while (this.walkChar('\n'))
 		return this.cursor > start
 	}
 
 	public walkNewline () {
 		const start = this.cursor
-		if (this.char === "\r") this.next()
-		if (this.char === "\n") this.next()
+		if (this.char === '\r') this.next()
+		if (this.char === '\n') this.next()
 		return this.cursor > start
 	}
 
@@ -326,4 +328,5 @@ export default class StringWalker {
 
 		return true
 	}
+
 }

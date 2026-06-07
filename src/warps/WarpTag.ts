@@ -1,15 +1,15 @@
-import Token from "../Token"
-import Warp, { Match } from "../Warp"
+import Token from '../Token'
+import Warp, { Match } from '../Warp'
 
 export default new Warp()
 	.match(new Match(`${Match.BASIC_START}#`))
 	.setTokeniser((walker, match, api) => {
 		walker.walkWhitespace()
-		const tag = api.tokenise(walker, [":", ...match.end])
+		const tag = api.tokenise(walker, [':', ...match.end])
 		if (!tag)
 			return undefined
 
-		if (!walker.walkSubstr(":"))
+		if (!walker.walkSubstr(':'))
 			return undefined
 
 		const content = api.tokenise(walker, match.end)
@@ -22,4 +22,4 @@ export default new Warp()
 			.setCompiled(`{content:[${Token.compile(...content)}],tag:${Token.stringify(...tag)}}`,
 				Token.stringify(true, ...content))
 	})
-	.addWeftProperty("tag", "string")
+	.addWeftProperty('tag', 'string')

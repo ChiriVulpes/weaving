@@ -1,5 +1,5 @@
-import Token, { IArgument } from "../Token"
-import Warp from "../Warp"
+import Token, { IArgument } from '../Token'
+import Warp from '../Warp'
 
 export default new Warp()
 	.setTokeniser((walker, match, api) => {
@@ -11,7 +11,7 @@ export default new Warp()
 
 		ArgumentMode: {
 			let inverted = false
-			if (walker.walkSubstr("!")) {
+			if (walker.walkSubstr('!')) {
 				inverted = true
 				walker.walkWhitespace()
 			}
@@ -21,21 +21,19 @@ export default new Warp()
 				break ArgumentMode
 
 			walker.walkWhitespace()
-			if (!walker.walkSubstr("?")) {
+			if (!walker.walkSubstr('?')) {
 				argument = undefined
 				break ArgumentMode
 			}
 
-			if (walker.walkSubstr("?")) {
+			if (walker.walkSubstr('?')) {
 				// handled by argument warp
 				walker.restore()
 				return undefined
 			}
 
-			checkExpression = `${inverted ? "!" : ""}${IArgument.accessor(argument)}`
-		}
-
-		if (argument) walker.unsave()
+			checkExpression = `${inverted ? '!' : ''}${IArgument.accessor(argument)}`
+		}		if (argument) walker.unsave()
 		else {
 			walker.restore()
 			return undefined
@@ -43,8 +41,8 @@ export default new Warp()
 			// const 
 		}
 
-		const ifTrue = api.tokenise(walker, [":", ...match.end])
-		walker.walkSubstr(":")
+		const ifTrue = api.tokenise(walker, [':', ...match.end])
+		walker.walkSubstr(':')
 		const ifFalse = api.tokenise(walker, match.end)
 
 		const token = new Token()
@@ -53,7 +51,7 @@ export default new Warp()
 				Token.rawGenerator(`${checkExpression}?\`${Token.stringify(true, ...ifTrue)}\`:\`${Token.stringify(true, ...ifFalse)}\``))
 
 		if (argument)
-			token.addArgument(argument, "any", true)
+			token.addArgument(argument, 'any', true)
 				.inheritArguments(IArgument.index(argument), ...ifTrue)
 		else
 			token.inheritArguments(...ifTrue)
