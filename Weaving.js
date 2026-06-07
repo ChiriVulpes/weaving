@@ -19,15 +19,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const File_1 = __importDefault(require("./File"));
     const Quilt_1 = __importDefault(require("./Quilt"));
     exports.Quilt = Quilt_1.default;
-    const UMD_HEADER = "(function(factory){if(typeof module===\"object\"&&typeof module.exports===\"object\"){var v=factory(require, exports);if(v!==undefined)module.exports=v}else if(typeof define===\"function\"&&define.amd){define([\"require\",\"exports\"],factory);}})(function(require,exports){\"use strict\";Object.defineProperty(exports,\"__esModule\",{value:true});let r=Symbol();let rts=Symbol();exports.WeavingArg={setRenderable:(t,ts)=>(t[r]=true,t[rts]=ts,t),isRenderable:t=>!!t[r]};";
-    const UMD_FOOTER = "})";
+    const UMD_HEADER = '(function(factory){if(typeof module==="object"&&typeof module.exports==="object"){var v=factory(require, exports);if(v!==undefined)module.exports=v}else if(typeof define==="function"&&define.amd){define(["require","exports"],factory);}})(function(require,exports){"use strict";Object.defineProperty(exports,"__esModule",{value:true});let r=Symbol();let rts=Symbol();exports.WeavingArg={setRenderable:(t,ts)=>(t[r]=true,t[rts]=ts,t),isRenderable:t=>!!t[r]};';
+    const UMD_FOOTER = '})';
     const FUNCTIONS = {
-        STRINGIFY: "let s=t=>typeof t==\"string\"?t:Array.isArray(t)?t.map(s).join(\"\"):typeof t=='object'&&rts in t?t[rts]():typeof t!=\"object\"||t===null||!t.content?String(t):typeof t.content!=\"object\"?String(t.content):s(t.content);",
-        IS_ITERABLE: "let ii=u=>(typeof u==\"object\"||typeof u==\"function\")&&Symbol.iterator in u;",
-        CONTENT: "let c=c=>({content:c,toString(){return s(this.content)}});",
-        WEFT_ARG: "let w=a=>typeof a=='object'&&'content' in a?a:{content:a};",
-        JOIN: "let j=(a,s,v)=>{a=(!a?[]:Array.isArray(a)?a:ii(a)?[...a]:[a]);return (v?a.map(v):a).flatMap((v,i)=>i<a.length-1?[].concat(w(v),s):w(v))};",
-        LENGTH: "let l=v=>!v?0:typeof v.length==\"number\"?v.length:typeof v.size==\"number\"?v.size:ii(v)?[...v].length:typeof v==\"object\"?Object.keys(v).length:0;",
+        STRINGIFY: 'let s=t=>typeof t=="string"?t:Array.isArray(t)?t.map(s).join(""):typeof t==\'object\'&&rts in t?t[rts]():typeof t!="object"||t===null||!t.content?String(t):typeof t.content!="object"?String(t.content):s(t.content);',
+        IS_ITERABLE: 'let ii=u=>(typeof u=="object"||typeof u=="function")&&Symbol.iterator in u;',
+        CONTENT: 'let c=c=>({content:c,toString(){return s(this.content)}});',
+        WEFT_ARG: 'let w=a=>typeof a==\'object\'&&\'content\' in a?a:{content:a};',
+        JOIN: 'let j=(a,s,v)=>{a=(!a?[]:Array.isArray(a)?a:ii(a)?[...a]:[a]);return (v?a.map(v):a).flatMap((v,i)=>i<a.length-1?[].concat(w(v),s):w(v))};',
+        LENGTH: 'let l=v=>!v?0:typeof v.length=="number"?v.length:typeof v.size=="number"?v.size:ii(v)?[...v].length:typeof v=="object"?Object.keys(v).length:0;',
     };
     const QUILT_HEADER_PRE_WEFT = `\
 export interface Weave {
@@ -71,14 +71,14 @@ export default quilt
     var Weaving;
     (function (Weaving) {
         async function quilt(file, options, warps = Quilt_1.default.DEFAULT_WARPS) {
-            if (!file.endsWith(".quilt"))
-                throw new Error("Source file should be a .quilt file");
+            if (!file.endsWith('.quilt'))
+                throw new Error('Source file should be a .quilt file');
             const relativeFile = File_1.default.relative(file);
             const basename = relativeFile.slice(0, -6);
-            let outTypes = path_1.default.resolve(process.cwd(), options?.outTypes ?? options?.out ?? "", `${basename}.d.ts`);
-            outTypes = outTypes.endsWith(".d.ts") ? outTypes : `${outTypes}${path_1.default.sep}${basename}.d.ts`;
-            let out = path_1.default.resolve(process.cwd(), options?.out ?? "", `${basename}.js`);
-            out = out.endsWith(".js") ? out : `${out}${path_1.default.sep}${basename}.js`;
+            let outTypes = path_1.default.resolve(process.cwd(), options?.outTypes ?? options?.out ?? '', `${basename}.d.ts`);
+            outTypes = outTypes.endsWith('.d.ts') ? outTypes : `${outTypes}${path_1.default.sep}${basename}.d.ts`;
+            let out = path_1.default.resolve(process.cwd(), options?.out ?? '', `${basename}.js`);
+            out = out.endsWith('.js') ? out : `${out}${path_1.default.sep}${basename}.js`;
             await promises_1.default.mkdir(path_1.default.dirname(out), { recursive: true });
             if (options?.types)
                 await promises_1.default.mkdir(path_1.default.dirname(outTypes), { recursive: true });
@@ -87,29 +87,28 @@ export default quilt
                 quilt = await (0, Quilt_1.default)(file, options, warps);
             }
             catch (e) {
-                const err = e instanceof Error ? e : new Error("Unknown error", { cause: e });
+                const err = e instanceof Error ? e : new Error('Unknown error', { cause: e });
                 let message;
-                const errorMessage = options?.verbose ? err.stack?.slice(7).replace(/\n/g, "\n   ") ?? "" : err.message;
+                const errorMessage = options?.verbose ? err.stack?.slice(7).replace(/\n/g, '\n   ') ?? '' : err.message;
                 if (err instanceof Quilt_1.default.Error) {
-                    const errorPosition = `${file}${err.line === undefined ? "" : `:${err.line}${err.column === undefined ? "" : `:${err.column}`}`}`;
-                    message = `Compilation error at ${(0, Colour_1.default)(errorPosition, "red")}: ${errorMessage}`;
+                    const errorPosition = `${file}${err.line === undefined ? '' : `:${err.line}${err.column === undefined ? '' : `:${err.column}`}`}`;
+                    message = `Compilation error at ${(0, Colour_1.default)(errorPosition, 'red')}: ${errorMessage}`;
                 }
                 else {
-                    message = `Failed to compile ${(0, Colour_1.default)(relativeFile, "red")}: ${errorMessage}`;
+                    message = `Failed to compile ${(0, Colour_1.default)(relativeFile, 'red')}: ${errorMessage}`;
                 }
-                // eslint-disable-next-line @typescript-eslint/restrict-template-expressions, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-                console.log((0, Colour_1.default)("X ", "lightRed"), (0, Colour_1.default)(message, "darkGray"));
+                console.log((0, Colour_1.default)('X ', 'lightRed'), (0, Colour_1.default)(message, 'darkGray'));
                 return false;
             }
-            const tab = options?.whitespace ? "\t" : "";
-            const space = options?.whitespace ? " " : "";
-            const newline = options?.whitespace ? "\n" : "";
-            let js = `${UMD_HEADER}${Object.values(FUNCTIONS).join("")}var q={${newline}`;
-            let dts = "";
+            const tab = options?.whitespace ? '\t' : '';
+            const space = options?.whitespace ? ' ' : '';
+            const newline = options?.whitespace ? '\n' : '';
+            let js = `${UMD_HEADER}${Object.values(FUNCTIONS).join('')}var q={${newline}`;
+            let dts = '';
             if (options?.types) {
                 dts += QUILT_HEADER_PRE_WEFT;
                 for (const warp of warps ?? [])
-                    for (const [property, type] of warp["_weftProperties"])
+                    for (const [property, type] of warp['_weftProperties'])
                         dts += `\t${property}?: ${type}\n`;
                 dts += QUILT_HEADER_POST_WEFT;
             }
@@ -130,8 +129,8 @@ export default quilt
             let files = [out];
             if (options?.types)
                 files.push(outTypes);
-            files = files.map(file => (0, Colour_1.default)(File_1.default.relative(file), "lightGreen"));
-            console.log((0, Colour_1.default)("✓ ", "lightGreen"), (0, Colour_1.default)(`Compiled ${(0, Colour_1.default)(relativeFile, "lightGreen")} => ${files.join(", ")}`, "darkGray"));
+            files = files.map(file => (0, Colour_1.default)(File_1.default.relative(file), 'lightGreen'));
+            console.log((0, Colour_1.default)('✓ ', 'lightGreen'), (0, Colour_1.default)(`Compiled ${(0, Colour_1.default)(relativeFile, 'lightGreen')} => ${files.join(', ')}`, 'darkGray'));
             return true;
         }
         Weaving.quilt = quilt;

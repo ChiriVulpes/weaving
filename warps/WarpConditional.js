@@ -55,7 +55,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         let checkExpression;
         ArgumentMode: {
             let inverted = false;
-            if (walker.walkSubstr("!")) {
+            if (walker.walkSubstr('!')) {
                 inverted = true;
                 walker.walkWhitespace();
             }
@@ -63,16 +63,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             if (!argument)
                 break ArgumentMode;
             walker.walkWhitespace();
-            if (!walker.walkSubstr("?")) {
+            if (!walker.walkSubstr('?')) {
                 argument = undefined;
                 break ArgumentMode;
             }
-            if (walker.walkSubstr("?")) {
+            if (walker.walkSubstr('?')) {
                 // handled by argument warp
                 walker.restore();
                 return undefined;
             }
-            checkExpression = `${inverted ? "!" : ""}${Token_1.IArgument.accessor(argument)}`;
+            checkExpression = `${inverted ? '!' : ''}${Token_1.IArgument.accessor(argument)}`;
         }
         if (argument)
             walker.unsave();
@@ -81,14 +81,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             return undefined;
             // const 
         }
-        const ifTrue = api.tokenise(walker, [":", ...match.end]);
-        walker.walkSubstr(":");
+        const ifTrue = api.tokenise(walker, [':', ...match.end]);
+        walker.walkSubstr(':');
         const ifFalse = api.tokenise(walker, match.end);
         const token = new Token_1.default()
             .inheritArguments(...ifFalse)
             .setCompiled(`...${checkExpression}?[${Token_1.default.compile(...ifTrue)}]:[${Token_1.default.compile(...ifFalse)}]`, Token_1.default.rawGenerator(`${checkExpression}?\`${Token_1.default.stringify(true, ...ifTrue)}\`:\`${Token_1.default.stringify(true, ...ifFalse)}\``));
         if (argument)
-            token.addArgument(argument, "any", true)
+            token.addArgument(argument, 'any', true)
                 .inheritArguments(Token_1.IArgument.index(argument), ...ifTrue);
         else
             token.inheritArguments(...ifTrue);

@@ -1,7 +1,7 @@
-import type { FSWatcher } from "chokidar";
-import type Warp from "./Warp";
-import type { Thread } from "./Weave";
-import Weave from "./Weave";
+import type { FSWatcher } from 'chokidar';
+import type Warp from './Warp';
+import type { Thread } from './Weave';
+import Weave from './Weave';
 interface Quilt {
     file: string;
     contents: string;

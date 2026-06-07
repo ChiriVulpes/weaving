@@ -51,10 +51,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         .match(new Warp_1.Match(`${Warp_1.Match.BASIC_START}#`))
         .setTokeniser((walker, match, api) => {
         walker.walkWhitespace();
-        const tag = api.tokenise(walker, [":", ...match.end]);
+        const tag = api.tokenise(walker, [':', ...match.end]);
         if (!tag)
             return undefined;
-        if (!walker.walkSubstr(":"))
+        if (!walker.walkSubstr(':'))
             return undefined;
         const content = api.tokenise(walker, match.end);
         if (!content)
@@ -64,5 +64,5 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             // TODO optimise output here by compressing a single token into this object
             .setCompiled(`{content:[${Token_1.default.compile(...content)}],tag:${Token_1.default.stringify(...tag)}}`, Token_1.default.stringify(true, ...content));
     })
-        .addWeftProperty("tag", "string");
+        .addWeftProperty('tag', 'string');
 });

@@ -1,4 +1,4 @@
-import Quilt from "./Quilt";
+import Quilt from './Quilt';
 export { Quilt };
 declare namespace Weaving {
     interface Options extends Quilt.Options {

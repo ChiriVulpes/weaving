@@ -54,11 +54,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const WarpTag_1 = __importDefault(require("./warps/WarpTag"));
     const Weave_1 = __importDefault(require("./Weave"));
     async function Quilt(file, options, warps = Quilt.DEFAULT_WARPS) {
-        if (!file.endsWith(".quilt"))
-            file += ".quilt";
+        if (!file.endsWith('.quilt'))
+            file += '.quilt';
         file = File_1.default.relative(file);
         options?.watcher?.add(file);
-        const contents = await fs.readFile(file, "utf8").catch(() => null);
+        const contents = await fs.readFile(file, 'utf8').catch(() => null);
         if (contents === null)
             throw error(`Unable to read quilt file: ${file}`);
         const quilt = {
@@ -72,20 +72,20 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         async function consume() {
             const threads = {};
             while (!walker.ended) {
-                if (walker.hasNext("#")) {
+                if (walker.hasNext('#')) {
                     const section = await consumeSection();
                     if (!section)
                         break;
                     Object.assign(threads, section);
                     continue;
                 }
-                if (walker.hasNext("- ")) {
+                if (walker.hasNext('- ')) {
                     // comment
                     walker.walkLine();
                     walker.walkNewlines();
                     continue;
                 }
-                if (walker.walkChar("~")) {
+                if (walker.walkChar('~')) {
                     const importFile = path_1.default.join(path_1.default.dirname(file), walker.walkLine());
                     const subThreads = await Quilt(importFile, options, warps);
                     Object.assign(threads, subThreads.threads);
@@ -100,14 +100,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         }
         function consumeThread() {
             switch (walker.char) {
-                case ":": {
-                    walker.walkChar(":"); // Consume the colon
+                case ':': {
+                    walker.walkChar(':'); // Consume the colon
                     return consumeWeaveOpportunity();
                 }
-                case "=": {
-                    walker.walkChar("="); // Consume the equals sign
+                case '=': {
+                    walker.walkChar('='); // Consume the equals sign
                     const refThreadName = consumeThreadName();
-                    if (walker.walkWhitespace() && walker.walkChar("|")) {
+                    if (walker.walkWhitespace() && walker.walkChar('|')) {
                         // Reference with argument(s)
                         const argumentWeave = consumeWeaveOpportunity();
                         return {
@@ -124,15 +124,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     };
                 }
                 default:
-                    throw error("Expected ':' or '=' after thread name'");
+                    throw error('Expected \':\' or \'=\' after thread name\'');
             }
         }
         function consumeWeaveOpportunity() {
             if (walker.walkNewlines())
                 return consumeMultilineWeave();
-            if (walker.walkChar(" "))
+            if (walker.walkChar(' '))
                 return consumeWeave();
-            throw error("Expected whitespace after thread name");
+            throw error('Expected whitespace after thread name');
         }
         function consumeWeave() {
             const line = walker.walkLine();
@@ -140,10 +140,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             return weave(text, warps);
         }
         function consumeMultilineWeave() {
-            let text = "";
-            while (walker.walkChar("\t")) {
+            let text = '';
+            while (walker.walkChar('\t')) {
                 const line = walker.walkLine();
-                text += line + "\n";
+                text += line + '\n';
                 walker.walkNewlines();
             }
             if (text)
@@ -152,35 +152,35 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             return weave(text, warps);
         }
         function processEscapeCharacters(text) {
-            let result = "";
+            let result = '';
             for (let i = 0; i < text.length; i++) {
                 const char = text[i];
-                if (char !== "\\") {
+                if (char !== '\\') {
                     result += char;
                     continue;
                 }
                 const nextChar = text[i + 1];
                 switch (nextChar) {
-                    case "n":
-                        result += "\n";
+                    case 'n':
+                        result += '\n';
                         i++;
                         continue;
-                    case "t":
-                        result += "\t";
+                    case 't':
+                        result += '\t';
                         i++;
                         continue;
-                    case "\n":
+                    case '\n':
                         // Skip the newline character
                         i++;
                         continue;
-                    case "\\":
-                        result += "\\";
+                    case '\\':
+                        result += '\\';
                         i++;
                         continue;
-                    case "x": {
+                    case 'x': {
                         const hex = text.slice(i + 2, i + 4);
                         if (hex.length !== 2)
-                            throw error("Invalid hex escape sequence, expected 2 characters after \\x");
+                            throw error('Invalid hex escape sequence, expected 2 characters after \\x');
                         const charCode = parseInt(hex, 16);
                         if (isNaN(charCode))
                             throw error(`Invalid hex escape sequence: \\x${hex}`);
@@ -188,10 +188,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         i += 3;
                         continue;
                     }
-                    case "u": {
+                    case 'u': {
                         const hex = text.slice(i + 2, i + 6);
                         if (hex.length !== 4)
-                            throw error("Invalid unicode escape sequence, expected 4 characters after \\u");
+                            throw error('Invalid unicode escape sequence, expected 4 characters after \\u');
                         const charCode = parseInt(hex, 16);
                         if (isNaN(charCode))
                             throw error(`Invalid unicode escape sequence: \\u${hex}`);
@@ -208,7 +208,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         async function consumeSection() {
             walker.save();
             const levelBefore = currentLevel;
-            const level = walker.walkUntilNot("#").length;
+            const level = walker.walkUntilNot('#').length;
             if (level <= levelBefore) {
                 walker.restore();
                 return null;
@@ -218,7 +218,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             walker.walkWhitespace();
             const name = consumeThreadName();
             if (!walker.walkNewlines())
-                throw new Error("Expected newline after thread name");
+                throw new Error('Expected newline after thread name');
             const threads = await consume();
             currentLevel = levelBefore;
             return Object.fromEntries(Object.entries(threads)
@@ -238,12 +238,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 if (!isValidChar) {
                     const name = walker.str.slice(walker.cursor, i);
                     if (!name)
-                        throw error("Expected thread name");
+                        throw error('Expected thread name');
                     walker.walkTo(i);
                     return name;
                 }
             }
-            throw error("Unexpected end of file");
+            throw error('Unexpected end of file');
         }
         function error(message) {
             return new Quilt.Error(message, walker.line, walker.column);

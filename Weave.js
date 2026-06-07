@@ -21,7 +21,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             return Weave.compileTokens(...new Weave(source, warps).tokenise());
         }
         static compileTokens(...tokens) {
-            let compiled = "";
+            let compiled = '';
             const argTypes = [];
             let lastRequiredIndex = -1;
             const optionals = [];
@@ -35,11 +35,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         hasRest = true;
                         break;
                     }
-                    const keys = path.split(".");
+                    const keys = path.split('.');
                     if (keys.length === 0)
                         continue;
                     if (isNaN(+keys[0]))
-                        keys.unshift("0");
+                        keys.unshift('0');
                     const generatedType = this.compileType(keys.slice(1), type);
                     const index = +keys[0];
                     (argTypes[index] ??= new Set()).add(generatedType);
@@ -50,21 +50,21 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 }
             }
             compiled = compiled.slice(0, -1);
-            let args = "";
+            let args = '';
             if (argTypes.length)
                 args = [...argTypes]
                     .map((typeSet, i) => {
                     if (typeSet && typeSet.size > 1)
                         // prevent `Explicit Types & any`
-                        typeSet.delete("any");
-                    const type = !typeSet ? "any" : [...typeSet].join(" & ");
-                    return `arg_${i}${lastRequiredIndex < i ? "?" : ""}: ${optionals[i] && lastRequiredIndex >= i ? `(${type}) | undefined` : type}`;
+                        typeSet.delete('any');
+                    const type = !typeSet ? 'any' : [...typeSet].join(' & ');
+                    return `arg_${i}${lastRequiredIndex < i ? '?' : ''}: ${optionals[i] && lastRequiredIndex >= i ? `(${type}) | undefined` : type}`;
                 })
-                    .join(", ");
+                    .join(', ');
             if (hasRest)
-                args += `${args ? ", " : ""}...args: WeavingArg[]`;
+                args += `${args ? ', ' : ''}...args: WeavingArg[]`;
             return {
-                script: `${args ? "(...a)" : "_"}=>c([${compiled}])`,
+                script: `${args ? '(...a)' : '_'}=>c([${compiled}])`,
                 definition: `(${args}): Weave`,
             };
         }

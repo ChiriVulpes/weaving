@@ -21,7 +21,7 @@
         return (n >= 65 && n < 91) // uppercase
             || (n >= 97 && n < 123) // lowercase
             || n === 95 // _
-            || n >= 48 && n < 58; // numbers
+            || (n >= 48 && n < 58); // numbers
     }
     function isDigit(n, base) {
         if (base <= 10)
@@ -37,10 +37,10 @@
         get nextChar() { return this.str[this.cursor + 1]; }
         get ended() { return this.cursor >= this.str.length; }
         get line() {
-            return this.str.slice(0, this.cursor).split("\n").length;
+            return this.str.slice(0, this.cursor).split('\n').length;
         }
         get column() {
-            const lastNewline = this.str.lastIndexOf("\n", this.cursor);
+            const lastNewline = this.str.lastIndexOf('\n', this.cursor);
             return lastNewline === -1
                 ? this.cursor + 1
                 : this.cursor - lastNewline;
@@ -88,20 +88,20 @@
             const start = this.cursor;
             let char = this.char;
             do {
-                if (char === "\r" || char === "\n")
+                if (char === '\r' || char === '\n')
                     break;
                 char = this.next();
             } while (char);
             return this.str.slice(start, this.cursor);
         }
         walkIndent() {
-            return this.walkUntilNot("\t");
+            return this.walkUntilNot('\t');
         }
         walkWhitespace() {
-            let whitespace = "";
+            let whitespace = '';
             let char = this.char;
             do {
-                if (char !== " " && char !== "\t" && char !== "\r" && char !== "\n")
+                if (char !== ' ' && char !== '\t' && char !== '\r' && char !== '\n')
                     break;
                 whitespace += char;
                 char = this.next();
@@ -109,9 +109,9 @@
             return whitespace;
         }
         walkArgument() {
-            let argument = "";
-            if (this.walkChar("&"))
-                argument += "&";
+            let argument = '';
+            if (this.walkChar('&'))
+                argument += '&';
             let char = this.char;
             do {
                 const n = char.charCodeAt(0);
@@ -124,9 +124,9 @@
             } while (char);
             this.save();
             this.walkWhitespace();
-            if (this.walkSubstr("..")) {
+            if (this.walkSubstr('..')) {
                 this.unsave();
-                argument += "..";
+                argument += '..';
             }
             else {
                 this.restore();
@@ -140,13 +140,13 @@
             return this.walkNumber(canHaveBigInt, false);
         }
         walkNumber(canHaveBigInt, canHaveFloat = true, canHaveExponent = true) {
-            const negative = this.walkChar("-");
+            const negative = this.walkChar('-');
             if (!negative)
-                this.walkChar("+");
+                this.walkChar('+');
             let char = this.char;
             let code = char?.charCodeAt(0);
             let base = 10;
-            let parseable = negative ? "-" : "";
+            let parseable = negative ? '-' : '';
             const canHaveBase = code === 48; /* 0 */
             if (canHaveBase) {
                 char = this.nextChar, code = char?.charCodeAt(0);
@@ -181,13 +181,13 @@
                 let exponent = this.walkNumber(canHaveBigInt, undefined, false);
                 if (exponent === undefined)
                     return integer;
-                if (typeof integer === "bigint") {
-                    if (typeof exponent !== "bigint")
+                if (typeof integer === 'bigint') {
+                    if (typeof exponent !== 'bigint')
                         exponent = BigInt(exponent);
                     return integer ** exponent;
                 }
                 else {
-                    if (typeof exponent === "bigint")
+                    if (typeof exponent === 'bigint')
                         integer = BigInt(integer);
                     return integer ** exponent;
                 }
@@ -195,7 +195,7 @@
             return integer;
         }
         walkDigits(base, char = this.char, code = char?.charCodeAt(0)) {
-            let digits = "";
+            let digits = '';
             let canUnderscore = false;
             let nextIsDigit;
             do {
@@ -243,16 +243,16 @@
         walkNewlines() {
             const start = this.cursor;
             do
-                if (this.char === "\r")
+                if (this.char === '\r')
                     this.next();
-            while (this.walkChar("\n"));
+            while (this.walkChar('\n'));
             return this.cursor > start;
         }
         walkNewline() {
             const start = this.cursor;
-            if (this.char === "\r")
+            if (this.char === '\r')
                 this.next();
-            if (this.char === "\n")
+            if (this.char === '\n')
                 this.next();
             return this.cursor > start;
         }

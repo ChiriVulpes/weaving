@@ -1,7 +1,7 @@
-import StringWalker from "./StringWalker";
-import type { IToken } from "./Token";
-import type Warp from "./Warp";
-import type { IWarpAPI } from "./Warp";
+import StringWalker from './StringWalker';
+import type { IToken } from './Token';
+import type Warp from './Warp';
+import type { IWarpAPI } from './Warp';
 export interface Thread {
     script: string;
     definition: string;

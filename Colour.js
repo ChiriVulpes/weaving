@@ -13,15 +13,13 @@
     let chalk;
     let ansicolor;
     try {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        chalk = require("chalk");
-        // eslint-disable-next-line no-empty
+        // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-unsafe-assignment
+        chalk = require('chalk');
     }
     catch { }
     try {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        ansicolor = require("ansicolor");
-        // eslint-disable-next-line no-empty
+        // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-unsafe-assignment
+        ansicolor = require('ansicolor');
     }
     catch { }
     function Colour(text, color) {
@@ -30,13 +28,13 @@
         if (ansicolor)
             // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
             return ansicolor[color](text);
-        let c2 = color.startsWith("light") ? `${color.slice(5).toLowerCase()}Bright` : color;
-        if (c2 === "darkGray")
-            c2 = "blackBright";
-        if (c2 === "white")
-            c2 = "whiteBright";
-        if (c2 === "grayBright")
-            c2 = "white";
+        let c2 = color.startsWith('light') ? `${color.slice(5).toLowerCase()}Bright` : color;
+        if (c2 === 'darkGray')
+            c2 = 'blackBright';
+        if (c2 === 'white')
+            c2 = 'whiteBright';
+        if (c2 === 'grayBright')
+            c2 = 'white';
         // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
         return chalk[c2](text);
     }

@@ -32,8 +32,8 @@
     }
     exports.default = Warp;
     class Match {
-        static BASIC_START = "{";
-        static BASIC_END = "}";
+        static BASIC_START = '{';
+        static BASIC_END = '}';
         static BASIC = new Match();
         constructor(start, end) {
             if (start !== undefined)
