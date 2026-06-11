@@ -66,6 +66,7 @@ namespace Weaving {
 		out?: string
 		types?: true
 		outTypes?: string
+		dry?: true
 	}
 
 	export async function quilt (file: string, options?: Options, warps = Quilt.DEFAULT_WARPS) {
@@ -78,10 +79,6 @@ namespace Weaving {
 		outTypes = outTypes.endsWith('.d.ts') ? outTypes : `${outTypes}${path.sep}${basename}.d.ts`
 		let out = path.resolve(process.cwd(), options?.out ?? '', `${basename}.js`)
 		out = out.endsWith('.js') ? out : `${out}${path.sep}${basename}.js`
-
-		await fs.mkdir(path.dirname(out), { recursive: true })
-		if (options?.types)
-			await fs.mkdir(path.dirname(outTypes), { recursive: true })
 
 		let quilt: Quilt
 		try {
@@ -130,17 +127,23 @@ namespace Weaving {
 		if (options?.types)
 			dts += QUILT_FOOTER
 
-		await Promise.all([
-			fs.writeFile(out, js),
-			options?.types && fs.writeFile(outTypes, dts),
-		])
+		if (!options?.dry) {
+			await fs.mkdir(path.dirname(out), { recursive: true })
+			if (options?.types)
+				await fs.mkdir(path.dirname(outTypes), { recursive: true })
+
+			await Promise.all([
+				fs.writeFile(out, js),
+				options?.types && fs.writeFile(outTypes, dts),
+			])
+		}
 
 		let files = [out]
 		if (options?.types)
 			files.push(outTypes)
 		files = files.map(file => Colour(File.relative(file), 'lightGreen'))
 
-		console.log(Colour('✓ ', 'lightGreen'), Colour(`Compiled ${Colour(relativeFile, 'lightGreen')} => ${files.join(', ')}`, 'darkGray'))
+		console.log(Colour('✓ ', 'lightGreen'), Colour(`${options?.dry ? 'Validated' : 'Compiled'} ${Colour(relativeFile, 'lightGreen')}${options?.dry ? '' : ` => ${files.join(', ')}`}`, 'darkGray'))
 		return true
 	}
 
