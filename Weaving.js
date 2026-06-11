@@ -79,9 +79,6 @@ export default quilt
             outTypes = outTypes.endsWith('.d.ts') ? outTypes : `${outTypes}${path_1.default.sep}${basename}.d.ts`;
             let out = path_1.default.resolve(process.cwd(), options?.out ?? '', `${basename}.js`);
             out = out.endsWith('.js') ? out : `${out}${path_1.default.sep}${basename}.js`;
-            await promises_1.default.mkdir(path_1.default.dirname(out), { recursive: true });
-            if (options?.types)
-                await promises_1.default.mkdir(path_1.default.dirname(outTypes), { recursive: true });
             let quilt;
             try {
                 quilt = await (0, Quilt_1.default)(file, options, warps);
@@ -122,15 +119,20 @@ export default quilt
             js += `};exports.default=q${UMD_FOOTER}`;
             if (options?.types)
                 dts += QUILT_FOOTER;
-            await Promise.all([
-                promises_1.default.writeFile(out, js),
-                options?.types && promises_1.default.writeFile(outTypes, dts),
-            ]);
+            if (!options?.dry) {
+                await promises_1.default.mkdir(path_1.default.dirname(out), { recursive: true });
+                if (options?.types)
+                    await promises_1.default.mkdir(path_1.default.dirname(outTypes), { recursive: true });
+                await Promise.all([
+                    promises_1.default.writeFile(out, js),
+                    options?.types && promises_1.default.writeFile(outTypes, dts),
+                ]);
+            }
             let files = [out];
             if (options?.types)
                 files.push(outTypes);
             files = files.map(file => (0, Colour_1.default)(File_1.default.relative(file), 'lightGreen'));
-            console.log((0, Colour_1.default)('✓ ', 'lightGreen'), (0, Colour_1.default)(`Compiled ${(0, Colour_1.default)(relativeFile, 'lightGreen')} => ${files.join(', ')}`, 'darkGray'));
+            console.log((0, Colour_1.default)('✓ ', 'lightGreen'), (0, Colour_1.default)(`${options?.dry ? 'Validated' : 'Compiled'} ${(0, Colour_1.default)(relativeFile, 'lightGreen')}${options?.dry ? '' : ` => ${files.join(', ')}`}`, 'darkGray'));
             return true;
         }
         Weaving.quilt = quilt;

@@ -6,6 +6,7 @@ declare namespace Weaving {
         out?: string;
         types?: true;
         outTypes?: string;
+        dry?: true;
     }
     function quilt(file: string, options?: Options, warps?: import("./Warp").default[]): Promise<boolean>;
 }
